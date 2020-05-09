@@ -106,7 +106,7 @@ public class StructureFlip {
 		long tripleCount = 0L;
 		while (triple != null) {
 			if (sed) {
-				triple.replaceAll("wktLiteral","wktliteral");
+				triple = triple.replaceAll("wktLiteral","wktliteral");
 			}			
 			Pattern pattern = Pattern.compile(TRIPLE_REGEX);
 			String src = null;
