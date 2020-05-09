@@ -44,6 +44,9 @@ public class StructureFlip {
 
 		Option outgzO = new Option("ogz", "output file should be GZipped");
 		outgzO.setArgs(0);
+		
+		Option pO = new Option("c", "s/#wktLiteral/#wktliteral/g");
+		outgzO.setArgs(0);
 
 		Option helpO = new Option("h", "print help");
 
@@ -52,6 +55,7 @@ public class StructureFlip {
 		options.addOption(ingzO);
 		options.addOption(outO);
 		options.addOption(outgzO);
+		options.addOption(pO);
 		options.addOption(helpO);
 
 		CommandLineParser parser = new DefaultParser();
@@ -80,12 +84,14 @@ public class StructureFlip {
 		// open the output
 		String out = cmd.getOptionValue(outO.getOpt());
 		boolean gzOut = cmd.hasOption(outgzO.getOpt());
+		
+		boolean p = cmd.hasOption(pO.getOpt());
 
 		// call the method that does the hard work
-		diffGraph(inl, gzIn, out, gzOut);
+		diffGraph(inl, gzIn, out, gzOut, p);
 	}
 
-	private static void diffGraph(String in, boolean gzIn, String out, boolean gzOut) throws IOException {
+	private static void diffGraph(String in, boolean gzIn, String out, boolean gzOut, boolean sed) throws IOException {
 		InputStream is = new FileInputStream(in);
 		if (gzIn)
 			is = new GZIPInputStream(is);
@@ -99,6 +105,9 @@ public class StructureFlip {
 		String triple = bufferedReader.readLine();
 		long tripleCount = 0L;
 		while (triple != null) {
+			if (sed) {
+				triple.replaceAll("wktLiteral","wktliteral");
+			}			
 			Pattern pattern = Pattern.compile(TRIPLE_REGEX);
 			String src = null;
 			String pred = null;
