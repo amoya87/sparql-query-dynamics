@@ -1,7 +1,7 @@
 package cl.uchile.dcc.dynamics.flip;
 
 import static cl.uchile.dcc.dynamics.utils.Constants.TICKS;
-import static cl.uchile.dcc.dynamics.utils.Constants.TRIPLE_REGEX;
+import static cl.uchile.dcc.dynamics.utils.Constants.TRIPLE_REGEX_LIGHT;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -108,7 +108,7 @@ public class StructureFlip {
 			if (sed) {
 				triple = triple.replaceAll("wktLiteral","wktliteral");
 			}			
-			Pattern pattern = Pattern.compile(TRIPLE_REGEX);
+			Pattern pattern = Pattern.compile(TRIPLE_REGEX_LIGHT);
 			String src = null;
 			String pred = null;
 			String obj = null;
@@ -127,7 +127,7 @@ public class StructureFlip {
 			tripleCount++;
 			triple = bufferedReader.readLine();
 			if (tripleCount % TICKS == 0L) {
-				System.err.println("Read" + tripleCount + " left triples");
+				System.err.println("Read " + tripleCount + " triples");
 				System.err.println(MemStats.getMemStats() + "\n");
 				System.out.println();
 			}

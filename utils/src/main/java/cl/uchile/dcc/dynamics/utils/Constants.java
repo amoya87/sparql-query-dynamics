@@ -9,5 +9,8 @@ private Constants(){}
 public static String TRIPLE_REGEX = "^(\\S+)\\s+(<[^>]+>)\\s+(.+\\S+)\\s*.$";
 
 //triple
+public static String TRIPLE_REGEX_LIGHT = "^(\\S+)\\s+(\\S+)\\s+(.+\\S+)\\s*.$";
+
+//triple
 public static int TICKS = 100000000;
 }
