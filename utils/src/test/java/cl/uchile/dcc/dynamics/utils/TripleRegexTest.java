@@ -1,6 +1,7 @@
 package cl.uchile.dcc.dynamics.utils;
 
 import static cl.uchile.dcc.dynamics.utils.Constants.TRIPLE_REGEX;
+import static cl.uchile.dcc.dynamics.utils.Constants.TRIPLE_REGEX_LIGHT;
 import static org.junit.Assert.assertEquals;
 
 import java.util.regex.Matcher;
@@ -20,6 +21,8 @@ public class TripleRegexTest {
 	public static String S = "_abc <http2> _abc ";	
 	public static String SS = "_abc <http2> _abc  ";
 	public static String P = "_abc <http2> _abc.";
+	public static String PSO = "<http2> _abc _abc.";
+	
 	//fail
 	public static String NF = "_abc <http2> _abc";
 	
@@ -102,6 +105,22 @@ public class TripleRegexTest {
 		Matcher matcher = pattern.matcher(P);
 		matcher.matches();
 		assertEquals(P, matcher.group(1) + " " + matcher.group(2) + " " + matcher.group(3) + ".");
+	}
+	
+	@Test(expected = IllegalStateException.class)
+	public void testPSO() {
+		Pattern pattern = Pattern.compile(TRIPLE_REGEX);
+		Matcher matcher = pattern.matcher(PSO);
+		matcher.matches();
+		String s = matcher.group(1) + " " + matcher.group(2) + " " + matcher.group(3) + ".";
+	}
+	
+	@Test
+	public void testPSOLight() {
+		Pattern pattern = Pattern.compile(TRIPLE_REGEX_LIGHT);
+		Matcher matcher = pattern.matcher(PSO);
+		matcher.matches();
+		assertEquals(PSO, matcher.group(1) + " " + matcher.group(2) + " " + matcher.group(3) + ".");
 	}
 
 }
