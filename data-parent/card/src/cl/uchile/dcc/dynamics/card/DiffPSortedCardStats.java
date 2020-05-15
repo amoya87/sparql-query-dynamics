@@ -123,16 +123,16 @@ public class DiffPSortedCardStats {
 		boolean gzOut = cmd.hasOption(outgzO.getOpt());
 
 		// if we need to print top-k afterwards
-		int k = Integer.MAX_VALUE;
+		int k = 100;
 		if (cmd.hasOption(kO.getOpt())) {
 			k = Integer.parseInt(cmd.getOptionValue(kO.getOpt()));
 		}
 
 		// if we need to read top-t triplets
-		int t = Integer.MAX_VALUE;
+		long t = Long.MAX_VALUE;
 		;
 		if (cmd.hasOption(tO.getOpt())) {
-			t = Integer.parseInt(cmd.getOptionValue(tO.getOpt()));
+			t = Long.parseLong(cmd.getOptionValue(tO.getOpt()));
 		}
 
 		diffGraph(inl, inr, gzIn, o1, o2, o3, o4, gzOut, k, t);
@@ -140,7 +140,7 @@ public class DiffPSortedCardStats {
 	}
 
 	private static void diffGraph(String inl, String inr, boolean gzIn, String o1, String o2, String i1, String u1,
-			boolean gzOut, int k, int t) throws IOException {
+			boolean gzOut, int k, long t) throws IOException {
 
 		// open the input
 		InputStream ils = new FileInputStream(inl);
@@ -291,8 +291,11 @@ public class DiffPSortedCardStats {
 			System.err.println("Readed" + ltripleCount + " ltriples and " + rtripleCount + "rtriples with ("+ lastPredicate + ")");
 			System.out.println(lastPredicate + ", " + itripleCount + ", " + iSubjects.size() + ", " + iObjects.size());
 		}
-		flushPredicate(itripleCount, utripleCount, iSubjects, iObjects, uSubjects, uObjects, lastPredicate,
-				printWriter3, printWriter4, k);
+		if (started) {
+			flushPredicate(itripleCount, utripleCount, iSubjects, iObjects, uSubjects, uObjects, lastPredicate,
+					printWriter3, printWriter4, k);
+		}
+		
 		System.err.println("Read" + ltripleCount);
 		System.err.println("Read" + rtripleCount);
 		inputl.close();
@@ -307,12 +310,14 @@ public class DiffPSortedCardStats {
 			Map<Integer, Integer> iObjects, Map<Integer, Integer> uSubjects, Map<Integer, Integer> uObjects,
 			String lastPredicate, PrintWriter i, PrintWriter u, int k) {
 
-		StringBuilder istr = new StringBuilder();
-		istr.append(lastPredicate).append(",").append(itripleCount).append(",").append(iSubjects.size()).append(",")
-				.append(iObjects.size()).append(",[").append(MapUtils.topk2String(iSubjects, k)).append("],[")
-				.append(MapUtils.topk2String(iObjects, k)).append("]");
-		i.println(istr);
-		i.flush();
+		if (itripleCount>0) {
+			StringBuilder istr = new StringBuilder();
+			istr.append(lastPredicate).append(",").append(itripleCount).append(",").append(iSubjects.size()).append(",")
+					.append(iObjects.size()).append(",[").append(MapUtils.topk2String(iSubjects, k)).append("],[")
+					.append(MapUtils.topk2String(iObjects, k)).append("]");
+			i.println(istr);
+			i.flush();
+		}		
 
 		Map<Integer, Integer> allSubjects = new HashMap<>(iSubjects);
 		uSubjects.forEach((key, value) -> allSubjects.merge(key, value, Integer::sum));
