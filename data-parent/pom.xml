@@ -16,6 +16,7 @@
 		<module>diff</module>
 		<module>stats</module>
 		<module>flip</module>
+		<module>card</module>
 	</modules>
 	
 	<dependencies>
