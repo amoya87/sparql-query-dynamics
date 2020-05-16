@@ -13,12 +13,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.Writer;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -123,7 +121,7 @@ public class DiffPSortedCardStats {
 		boolean gzOut = cmd.hasOption(outgzO.getOpt());
 
 		// if we need to print top-k afterwards
-		int k = 100;
+		int k = 1000;
 		if (cmd.hasOption(kO.getOpt())) {
 			k = Integer.parseInt(cmd.getOptionValue(kO.getOpt()));
 		}
@@ -195,6 +193,17 @@ public class DiffPSortedCardStats {
 		Pattern pattern = Pattern.compile(TRIPLE_REGEX);
 		Matcher lmatcher = null;
 		Matcher rmatcher = null;
+		Set<String> blacklist = new HashSet<>();
+		blacklist.add("<http://schema.org/name>");
+		blacklist.add("<http://www.w3.org/2000/01/rdf-schema#label>");
+		blacklist.add("<http://www.w3.org/2004/02/skos/core#prefLabel>");
+		blacklist.add("<http://schema.org/about>");
+		blacklist.add("<http://schema.org/version>");
+		blacklist.add("<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>");
+		blacklist.add("<http://schema.org/dateModified>");
+		blacklist.add("<http://schema.org/description>");
+		blacklist.add("<http://www.w3.org/2004/02/skos/core#altLabel>");
+		
 		try {
 			while ((leftTriple != null || rightTriple != null) && t-- > 0) {
 
@@ -203,7 +212,7 @@ public class DiffPSortedCardStats {
 					if (lmatcher.matches()) {
 						sl = lmatcher.group(1);
 						pl = lmatcher.group(2);
-						ol = lmatcher.group(3).trim();
+						ol = lmatcher.group(3);
 					} else
 						System.err.println("Error parseando " + leftTriple);
 				}
@@ -213,7 +222,7 @@ public class DiffPSortedCardStats {
 					if (rmatcher.matches()) {
 						sr = rmatcher.group(1);
 						pr = rmatcher.group(2);
-						or = rmatcher.group(3).trim();
+						or = rmatcher.group(3);
 					} else
 						System.err.println("Error parseando " + rightTriple);
 				}
@@ -238,8 +247,10 @@ public class DiffPSortedCardStats {
 					}
 					started = true;
 					lastPredicate = pl;
-					MapUtils.increment(uSubjects, sl.hashCode());
-					MapUtils.increment(uObjects, ol.hashCode());
+					if (!blacklist.contains(pl)) {
+						MapUtils.increment(uSubjects, sl.hashCode());
+						MapUtils.increment(uObjects, ol.hashCode());
+					}
 					++utripleCount;
 					printWriter1.println(leftTriple);
 					leftTriple = inputl.readLine();
@@ -255,8 +266,10 @@ public class DiffPSortedCardStats {
 					}
 					started = true;
 					lastPredicate = pr;
-					MapUtils.increment(uSubjects, sr.hashCode());
-					MapUtils.increment(uObjects, or.hashCode());
+					if (!blacklist.contains(pr)) {
+						MapUtils.increment(uSubjects, sr.hashCode());
+						MapUtils.increment(uObjects, or.hashCode());
+					}
 					++utripleCount;
 					printWriter2.println(rightTriple);
 					rightTriple = inputr.readLine();
@@ -272,8 +285,10 @@ public class DiffPSortedCardStats {
 				}
 				started = true;
 				lastPredicate = pl;
-				MapUtils.increment(iSubjects, sl.hashCode());
-				MapUtils.increment(iObjects, ol.hashCode());
+				if (!blacklist.contains(pl)) {
+					MapUtils.increment(iSubjects, sl.hashCode());
+					MapUtils.increment(iObjects, ol.hashCode());
+				}
 				++itripleCount;
 				leftTriple = inputl.readLine();
 				rightTriple = inputr.readLine();
@@ -313,9 +328,9 @@ public class DiffPSortedCardStats {
 
 		if (itripleCount > 0) {
 			StringBuilder istr = new StringBuilder();
-			istr.append(lastPredicate).append(",").append(itripleCount).append(",").append(iSubjects.size()).append(",")
-					.append(iObjects.size()).append(",[").append(MapUtils.topk2String(iSubjects, k)).append("],[")
-					.append(MapUtils.topk2String(iObjects, k)).append("]");
+			istr.append(lastPredicate).append("\t").append(itripleCount).append("\t").append(iSubjects.size())
+					.append("\t").append(iObjects.size()).append("\t").append(MapUtils.topk2String(iSubjects, k))
+					.append("\t").append(MapUtils.topk2String(iObjects, k));
 			i.println(istr);
 			i.flush();
 		}
@@ -325,10 +340,9 @@ public class DiffPSortedCardStats {
 		uObjects.forEach((key, value) -> iObjects.merge(key, value, Integer::sum));
 
 		StringBuilder ustr = new StringBuilder();
-		ustr.append(lastPredicate).append(",").append((itripleCount + utripleCount)).append(",")
-				.append(iSubjects.size()).append(",").append(iObjects.size()).append(",[")
-				.append(MapUtils.topk2String(iSubjects, k)).append("],[").append(MapUtils.topk2String(iObjects, k))
-				.append("]");
+		ustr.append(lastPredicate).append("\t").append((itripleCount + utripleCount)).append("\t")
+				.append(iSubjects.size()).append("\t").append(iObjects.size()).append("\t")
+				.append(MapUtils.topk2String(iSubjects, k)).append("\t").append(MapUtils.topk2String(iObjects, k));
 		u.println(ustr);
 		u.flush();
 		iSubjects.clear();
