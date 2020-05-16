@@ -281,21 +281,22 @@ public class DiffPSortedCardStats {
 				rtripleCount++;
 
 				if (ltripleCount % TICKS == 0) {
-					System.err.println("Readed" + ltripleCount + " ltriples and " + rtripleCount + "rtriples with ("
+					System.err.println("Readed " + ltripleCount + " ltriples and " + rtripleCount + " rtriples with ("
 							+ lastPredicate + ")");
 					System.err.println(MemStats.getMemStats() + "\n");
 				}
 
 			}
 		} catch (Exception e) {
-			System.err.println("Readed" + ltripleCount + " ltriples and " + rtripleCount + "rtriples with ("+ lastPredicate + ")");
+			System.err.println("Readed" + ltripleCount + " ltriples and " + rtripleCount + "rtriples with ("
+					+ lastPredicate + ")");
 			System.out.println(lastPredicate + ", " + itripleCount + ", " + iSubjects.size() + ", " + iObjects.size());
 		}
 		if (started) {
 			flushPredicate(itripleCount, utripleCount, iSubjects, iObjects, uSubjects, uObjects, lastPredicate,
 					printWriter3, printWriter4, k);
 		}
-		
+
 		System.err.println("Read" + ltripleCount);
 		System.err.println("Read" + rtripleCount);
 		inputl.close();
@@ -310,25 +311,23 @@ public class DiffPSortedCardStats {
 			Map<Integer, Integer> iObjects, Map<Integer, Integer> uSubjects, Map<Integer, Integer> uObjects,
 			String lastPredicate, PrintWriter i, PrintWriter u, int k) {
 
-		if (itripleCount>0) {
+		if (itripleCount > 0) {
 			StringBuilder istr = new StringBuilder();
 			istr.append(lastPredicate).append(",").append(itripleCount).append(",").append(iSubjects.size()).append(",")
 					.append(iObjects.size()).append(",[").append(MapUtils.topk2String(iSubjects, k)).append("],[")
 					.append(MapUtils.topk2String(iObjects, k)).append("]");
 			i.println(istr);
 			i.flush();
-		}		
+		}
 
-		Map<Integer, Integer> allSubjects = new HashMap<>(iSubjects);
-		uSubjects.forEach((key, value) -> allSubjects.merge(key, value, Integer::sum));
+		uSubjects.forEach((key, value) -> iSubjects.merge(key, value, Integer::sum));
 
-		Map<Integer, Integer> allObjects = new HashMap<>(iObjects);
-		uObjects.forEach((key, value) -> allObjects.merge(key, value, Integer::sum));
+		uObjects.forEach((key, value) -> iObjects.merge(key, value, Integer::sum));
 
 		StringBuilder ustr = new StringBuilder();
 		ustr.append(lastPredicate).append(",").append((itripleCount + utripleCount)).append(",")
-				.append(allSubjects.size()).append(",").append(allObjects.size()).append(",[")
-				.append(MapUtils.topk2String(allSubjects, k)).append("],[").append(MapUtils.topk2String(allObjects, k))
+				.append(iSubjects.size()).append(",").append(iObjects.size()).append(",[")
+				.append(MapUtils.topk2String(iSubjects, k)).append("],[").append(MapUtils.topk2String(iObjects, k))
 				.append("]");
 		u.println(ustr);
 		u.flush();
