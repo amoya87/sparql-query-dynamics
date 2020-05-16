@@ -203,7 +203,7 @@ public class DiffPSortedCardStats {
 		blacklist.add("<http://schema.org/dateModified>");
 		blacklist.add("<http://schema.org/description>");
 		blacklist.add("<http://www.w3.org/2004/02/skos/core#altLabel>");
-		
+
 		try {
 			while ((leftTriple != null || rightTriple != null) && t-- > 0) {
 
@@ -239,14 +239,19 @@ public class DiffPSortedCardStats {
 				}
 
 				if (i < 0) {
-					if (!pl.equals(lastPredicate) && started) {
-						flushPredicate(itripleCount, utripleCount, iSubjects, iObjects, uSubjects, uObjects,
-								lastPredicate, printWriter3, printWriter4, k);
-						itripleCount = 0;
-						utripleCount = 0;
+					if (!pl.equals(lastPredicate)) {
+						if (started) {
+							flushPredicate(itripleCount, utripleCount, iSubjects, iObjects, uSubjects, uObjects,
+									lastPredicate, printWriter3, printWriter4, k);
+							printWriter1.flush();
+							printWriter2.flush();
+							itripleCount = 0;
+							utripleCount = 0;
+						}
+						lastPredicate = pl;
+						started = true;
 					}
-					started = true;
-					lastPredicate = pl;
+
 					if (!blacklist.contains(pl)) {
 						MapUtils.increment(uSubjects, sl.hashCode());
 						MapUtils.increment(uObjects, ol.hashCode());
@@ -258,14 +263,19 @@ public class DiffPSortedCardStats {
 					continue;
 				}
 				if (i > 0) {
-					if (!pr.equals(lastPredicate) && started) {
-						flushPredicate(itripleCount, utripleCount, iSubjects, iObjects, uSubjects, uObjects,
-								lastPredicate, printWriter3, printWriter4, k);
-						itripleCount = 0;
-						utripleCount = 0;
+					if (!pr.equals(lastPredicate)) {
+						if (started) {
+							flushPredicate(itripleCount, utripleCount, iSubjects, iObjects, uSubjects, uObjects,
+									lastPredicate, printWriter3, printWriter4, k);
+							printWriter1.flush();
+							printWriter2.flush();
+							itripleCount = 0;
+							utripleCount = 0;
+						}
+						lastPredicate = pr;
+						started = true;
 					}
-					started = true;
-					lastPredicate = pr;
+
 					if (!blacklist.contains(pr)) {
 						MapUtils.increment(uSubjects, sr.hashCode());
 						MapUtils.increment(uObjects, or.hashCode());
@@ -277,14 +287,19 @@ public class DiffPSortedCardStats {
 					continue;
 				}
 
-				if (!pl.equals(lastPredicate) && started) {
-					flushPredicate(itripleCount, utripleCount, iSubjects, iObjects, uSubjects, uObjects, lastPredicate,
-							printWriter3, printWriter4, k);
-					itripleCount = 0;
-					utripleCount = 0;
+				if (!pl.equals(lastPredicate)) {
+					if (started) {
+						flushPredicate(itripleCount, utripleCount, iSubjects, iObjects, uSubjects, uObjects,
+								lastPredicate, printWriter3, printWriter4, k);
+						printWriter1.flush();
+						printWriter2.flush();
+						itripleCount = 0;
+						utripleCount = 0;
+					}
+					lastPredicate = pl;
+					started = true;
 				}
-				started = true;
-				lastPredicate = pl;
+
 				if (!blacklist.contains(pl)) {
 					MapUtils.increment(iSubjects, sl.hashCode());
 					MapUtils.increment(iObjects, ol.hashCode());

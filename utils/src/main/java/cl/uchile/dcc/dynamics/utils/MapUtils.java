@@ -34,19 +34,24 @@ public class MapUtils
 		for (Iterator it = sortedMap.entrySet().iterator(); it.hasNext();) {
 			Map.Entry<Integer, Integer> entry = (Map.Entry<Integer, Integer>) it.next();
 			i++;
+			Integer key = null;
+			Integer value = null;
 			if (i == 1) {
-				Integer key = entry.getKey();
-				Integer value = entry.getValue();
+				key = entry.getKey();
+				value = entry.getValue();
 				query.append(key);
 				query.append("=");
 				query.append(value);
 			} else if (i <= k) {
 				query.append(",");
-				Integer key = entry.getKey();
-				Integer value = entry.getValue();
+				key = entry.getKey();
+				value = entry.getValue();
 				query.append(key);
 				query.append("=");
 				query.append(value);
+			}
+			if (value == 1) {
+				break;
 			}
 		}
 		return query.toString();
