@@ -6,6 +6,7 @@ for db in ${dbs}; do
     cd /usr/local/var/lib/virtuoso/db/
     rm virtuoso.db
     ln -s /home/amoya/virtuoso-dbs/${db} virtuoso.db
+    cp virtuoso.ini backup.virtuoso.ini ; rm virtuoso* ; mv backup.virtuoso.ini virtuoso.ini
     virtuoso-t &
     echo "esperando"
     sleep 500
