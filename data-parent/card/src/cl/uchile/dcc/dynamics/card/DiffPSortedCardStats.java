@@ -74,7 +74,7 @@ public class DiffPSortedCardStats {
 		tO.setArgs(1);
 		tO.setRequired(false);
 
-		Option jO = new Option("j", "jump j lines to read in left");
+		Option jO = new Option("j", "jump j lines to read in left(have precedence over t)");
 		tO.setArgs(1);
 		tO.setRequired(false);
 
@@ -363,12 +363,14 @@ public class DiffPSortedCardStats {
 		if (itripleCount > 0) {
 			StringBuilder istr = new StringBuilder();
 			istr.append(lastPredicate).append("\t").append(itripleCount).append("\t").append(iSubjectsSize).append("\t")
-					.append(iObjectsSize);
+					.append(iObjectsSize).append("\t");
 			if (iSubjectsSize < itripleCount) {
-				istr.append("\t").append(MapUtils.topk2String(iSubjects, k));
+				istr.append(MapUtils.topk2String(iSubjects, k)).append("\t");
+			} else {
+				istr.append("\t");
 			}
 			if (iObjectsSize < itripleCount) {
-				istr.append("\t").append(MapUtils.topk2String(iObjects, k));
+				istr.append(MapUtils.topk2String(iObjects, k));
 			}
 
 			i.println(istr);
@@ -385,13 +387,15 @@ public class DiffPSortedCardStats {
 
 		StringBuilder ustr = new StringBuilder();
 		ustr.append(lastPredicate).append("\t").append(utripleCount).append("\t").append(uSubjectsSize).append("\t")
-				.append(uObjectsSize);
+				.append(uObjectsSize).append("\t");
 
 		if (uSubjectsSize < utripleCount) {
-			ustr.append("\t").append(MapUtils.topk2String(iSubjects, k));
+			ustr.append(MapUtils.topk2String(iSubjects, k)).append("\t");
+		} else {
+			ustr.append("\t");
 		}
 		if (uObjectsSize < utripleCount) {
-			ustr.append("\t").append(MapUtils.topk2String(iObjects, k));
+			ustr.append(MapUtils.topk2String(iObjects, k));
 		}
 
 		u.println(ustr);
