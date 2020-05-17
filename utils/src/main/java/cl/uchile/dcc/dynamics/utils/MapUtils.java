@@ -49,7 +49,10 @@ public class MapUtils
 				query.append(key);
 				query.append("=");
 				query.append(value);
+			} else {
+				break;
 			}
+
 			if (value == 1) {
 				break;
 			}
