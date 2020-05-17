@@ -66,11 +66,15 @@ public class DiffPSortedCardStats {
 		Option outgzO = new Option("ogz", "output file should be GZipped");
 		outgzO.setArgs(0);
 
-		Option kO = new Option("k", "print first k lines to std out when finished");
+		Option kO = new Option("k", "print top-k values in MCV");
 		kO.setArgs(1);
 		kO.setRequired(false);
 
 		Option tO = new Option("t", "print first t lines to read in");
+		tO.setArgs(1);
+		tO.setRequired(false);
+
+		Option jO = new Option("j", "jump j lines to read in left");
 		tO.setArgs(1);
 		tO.setRequired(false);
 
@@ -85,6 +89,7 @@ public class DiffPSortedCardStats {
 		options.addOption(out3);
 		options.addOption(kO);
 		options.addOption(tO);
+		options.addOption(jO);
 		options.addOption(out4);
 		options.addOption(outgzO);
 		options.addOption(helpO);
@@ -133,12 +138,18 @@ public class DiffPSortedCardStats {
 			t = Long.parseLong(cmd.getOptionValue(tO.getOpt()));
 		}
 
-		diffGraph(inl, inr, gzIn, o1, o2, o3, o4, gzOut, k, t);
+		long j = 0;
+		;
+		if (cmd.hasOption(jO.getOpt())) {
+			j = Long.parseLong(cmd.getOptionValue(jO.getOpt()));
+		}
+
+		diffGraph(inl, inr, gzIn, o1, o2, o3, o4, gzOut, k, t, j);
 
 	}
 
 	private static void diffGraph(String inl, String inr, boolean gzIn, String o1, String o2, String i1, String u1,
-			boolean gzOut, int k, long t) throws IOException {
+			boolean gzOut, int k, long t, long j) throws IOException {
 
 		// open the input
 		InputStream ils = new FileInputStream(inl);
@@ -203,6 +214,11 @@ public class DiffPSortedCardStats {
 		blacklist.add("<http://schema.org/dateModified>");
 		blacklist.add("<http://schema.org/description>");
 		blacklist.add("<http://www.w3.org/2004/02/skos/core#altLabel>");
+
+		while (j-- > 0) {
+			inputl.readLine();
+			inputr.readLine();
+		}
 
 		try {
 			while ((leftTriple != null || rightTriple != null) && t-- > 0) {
@@ -337,15 +353,24 @@ public class DiffPSortedCardStats {
 		printWriter4.close();
 	}
 
-	private static void flushPredicate(long itripleCount, long utripleCount, Map<Integer, Integer> iSubjects,
+	private static void flushPredicate(long itripleCount, long otripleCount, Map<Integer, Integer> iSubjects,
 			Map<Integer, Integer> iObjects, Map<Integer, Integer> uSubjects, Map<Integer, Integer> uObjects,
 			String lastPredicate, PrintWriter i, PrintWriter u, int k) {
 
+		int iSubjectsSize = iSubjects.size();
+		int iObjectsSize = iObjects.size();
+
 		if (itripleCount > 0) {
 			StringBuilder istr = new StringBuilder();
-			istr.append(lastPredicate).append("\t").append(itripleCount).append("\t").append(iSubjects.size())
-					.append("\t").append(iObjects.size()).append("\t").append(MapUtils.topk2String(iSubjects, k))
-					.append("\t").append(MapUtils.topk2String(iObjects, k));
+			istr.append(lastPredicate).append("\t").append(itripleCount).append("\t").append(iSubjectsSize).append("\t")
+					.append(iObjectsSize);
+			if (iSubjectsSize < itripleCount) {
+				istr.append("\t").append(MapUtils.topk2String(iSubjects, k));
+			}
+			if (iObjectsSize < itripleCount) {
+				istr.append("\t").append(MapUtils.topk2String(iObjects, k));
+			}
+
 			i.println(istr);
 			i.flush();
 		}
@@ -354,10 +379,21 @@ public class DiffPSortedCardStats {
 
 		uObjects.forEach((key, value) -> iObjects.merge(key, value, Integer::sum));
 
+		long utripleCount = itripleCount + otripleCount;
+		int uSubjectsSize = iSubjects.size();
+		int uObjectsSize = iObjects.size();
+
 		StringBuilder ustr = new StringBuilder();
-		ustr.append(lastPredicate).append("\t").append((itripleCount + utripleCount)).append("\t")
-				.append(iSubjects.size()).append("\t").append(iObjects.size()).append("\t")
-				.append(MapUtils.topk2String(iSubjects, k)).append("\t").append(MapUtils.topk2String(iObjects, k));
+		ustr.append(lastPredicate).append("\t").append(utripleCount).append("\t").append(uSubjectsSize).append("\t")
+				.append(uObjectsSize);
+
+		if (uSubjectsSize < utripleCount) {
+			ustr.append("\t").append(MapUtils.topk2String(iSubjects, k));
+		}
+		if (uObjectsSize < utripleCount) {
+			ustr.append("\t").append(MapUtils.topk2String(iObjects, k));
+		}
+
 		u.println(ustr);
 		u.flush();
 		iSubjects.clear();
