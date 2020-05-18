@@ -30,7 +30,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>cl.uchile.dcc.dynamics.diff.PredicateDynamicStats</mainClass>
+							<mainClass>cl.uchile.dcc.data.diff.PredicateDynamicStats</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>

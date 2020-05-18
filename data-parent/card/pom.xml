@@ -30,7 +30,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>cl.uchile.dcc.dynamics.card.DiffPSortedCardStats</mainClass>
+							<mainClass>cl.uchile.dcc.data.card.DiffPSortedCardStats</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>

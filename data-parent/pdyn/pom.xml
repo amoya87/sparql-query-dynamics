@@ -38,7 +38,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>cl.uchile.dcc.dynamics.pdyn.PredicateDiff</mainClass>
+							<mainClass>cl.uchile.dcc.data.pdyn.PredicateDiff</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>

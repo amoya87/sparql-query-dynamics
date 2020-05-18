@@ -26,9 +26,9 @@
 	</developers>
 
 	<modules>
-		<module>query</module>
 		<module>utils</module>
 		<module>data-parent</module>
+		<module>query-parent</module>
 	</modules>
 
 	<properties>

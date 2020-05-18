@@ -30,7 +30,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>cl.uchile.dcc.dynamics.flip.StructureFlip</mainClass>
+							<mainClass>cl.uchile.dcc.data.flip.StructureFlip</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>
