@@ -1,16 +1,33 @@
 package cl.uchile.dcc.query.cardinality;
 
-public class TriplePattern extends Operator {
+import java.util.Map;
+import java.util.Set;
 
-	public TriplePattern(TableStats stats) {
-		super(stats);
-		// TODO Auto-generated constructor stub
+import org.apache.commons.lang3.tuple.Pair;
+
+public class TriplePattern extends Operator{
+	
+	private double cardinality;
+
+	public TriplePattern(TableStats tripleStat, double card) {
+		super(tripleStat);
+		cardinality = card;
 	}
 
 	@Override
-	public int getCardinality() {
+	public double getCardinality() {
 		// TODO Auto-generated method stub
-		return 0;
+		return cardinality;
+	}
+
+	@Override
+	public Set<String> getVariables() {
+		return stats.getVars();
+	}
+
+	@Override
+	public Pair<Integer, Map<Integer, Integer>> getVariableStats(String varName) {
+		return stats.getVariableStats(varName);
 	}
 
 }

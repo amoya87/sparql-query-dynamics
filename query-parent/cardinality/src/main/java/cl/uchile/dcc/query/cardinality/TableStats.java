@@ -2,6 +2,7 @@ package cl.uchile.dcc.query.cardinality;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -28,8 +29,12 @@ public class TableStats {
 	public Pair<Integer, Map<Integer, Integer>> getVariableStats(String varName) {
 		return variables.get(varName);
 	}
+	
+	public Set<String> getVars() {
+		return variables.keySet();
+	}
 
-	public void addVariables(String varName, Pair<Integer, Map<Integer, Integer>> sVar) {
+	public void addVariable(String varName, Pair<Integer, Map<Integer, Integer>> sVar) {
 		this.variables.put(varName, sVar);
 	}
 }

@@ -1,18 +1,26 @@
 package cl.uchile.dcc.query.cardinality;
 
-public abstract class Operator {
+public abstract class Operator implements IOperator{
 
-	private TableStats stats;
+	protected TableStats stats;
 	
-	public Operator(TableStats stats) {
+	protected Operator(TableStats stats) {
 		super();
 		this.stats = stats;
 	}
 	
-	public abstract int getCardinality();
+	protected Operator() {
+		super();
+	}
+	
+	public abstract double getCardinality();
 
-	
-	
-	
+	public TableStats getStats() {
+		return stats;
+	}
+
+	public void setStats(TableStats stats) {
+		this.stats = stats;
+	}
 
 }
