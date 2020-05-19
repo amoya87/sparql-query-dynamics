@@ -74,10 +74,6 @@ public class DiffPSortedCardStats {
 		tO.setArgs(1);
 		tO.setRequired(false);
 
-		Option jO = new Option("j", "jump j lines to read in left(have precedence over t)");
-		tO.setArgs(1);
-		tO.setRequired(false);
-
 		Option helpO = new Option("h", "print help");
 
 		Options options = new Options();
@@ -89,7 +85,6 @@ public class DiffPSortedCardStats {
 		options.addOption(out3);
 		options.addOption(kO);
 		options.addOption(tO);
-		options.addOption(jO);
 		options.addOption(out4);
 		options.addOption(outgzO);
 		options.addOption(helpO);
@@ -138,18 +133,12 @@ public class DiffPSortedCardStats {
 			t = Long.parseLong(cmd.getOptionValue(tO.getOpt()));
 		}
 
-		long j = 0;
-		;
-		if (cmd.hasOption(jO.getOpt())) {
-			j = Long.parseLong(cmd.getOptionValue(jO.getOpt()));
-		}
-
-		diffGraph(inl, inr, gzIn, o1, o2, o3, o4, gzOut, k, t, j);
+		diffGraph(inl, inr, gzIn, o1, o2, o3, o4, gzOut, k, t);
 
 	}
 
 	private static void diffGraph(String inl, String inr, boolean gzIn, String o1, String o2, String i1, String u1,
-			boolean gzOut, int k, long t, long j) throws IOException {
+			boolean gzOut, int k, long t) throws IOException {
 
 		// open the input
 		InputStream ils = new FileInputStream(inl);
@@ -216,11 +205,6 @@ public class DiffPSortedCardStats {
 		blacklist.add("<http://schema.org/dateModified>");
 		blacklist.add("<http://schema.org/description>");
 		blacklist.add("<http://www.w3.org/2004/02/skos/core#altLabel>");
-
-		while (j-- > 0) {
-			inputl.readLine();
-			inputr.readLine();
-		}
 
 		try {
 			while ((leftTriple != null || rightTriple != null) && t-- > 0) {
