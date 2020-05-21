@@ -5,20 +5,17 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
@@ -48,6 +45,7 @@ public class CardEstimator {
 	public static void main(String[] args) {
 		File path = new File(args[0]);
 		File datapath = new File(args[1]);
+		int mcvLenght = Integer.parseInt(args[2]);
 		Map<String, TableStats> dbs = new HashMap<>();
 
 		int tp = -1;
@@ -66,34 +64,31 @@ public class CardEstimator {
 				long tripleNum = Long.parseLong(vals[1]);
 				int subjectsNum = Integer.parseInt(vals[2]);
 				int objectsNum = Integer.parseInt(vals[3]);
-				
+
 				Map<Integer, Integer> subjMCV = new HashMap<Integer, Integer>();
 				Map<Integer, Integer> objMCV = new HashMap<Integer, Integer>();
 
 				if (vals.length > 4) {
 					String smcv = vals[4];
 					if (!smcv.equals("")) {
-						Map<String, String> subjMCVStr = MapUtils.string2Map(smcv);
+						Map<String, String> subjMCVStr = MapUtils.string2Map(smcv, mcvLenght);
 						subjMCVStr.forEach((key, value) -> subjMCV.put(Integer.parseInt(key), Integer.parseInt(value)));
 					}
 				}
 
-				Pair<Integer, Map<Integer, Integer>> sVar = new ImmutablePair<>(subjectsNum, subjMCV);
-				
-
 				if (vals.length > 5) {
 					String omcv = vals[5];
-					Map<String, String> objMCVStr = MapUtils.string2Map(omcv);
-					objMCVStr.forEach((key, value) -> objMCV.put(Integer.parseInt(key), Integer.parseInt(value)));
+					Map<String, String> objMCVStr = MapUtils.string2Map(omcv, mcvLenght);
+					objMCVStr.forEach((key, value) -> {
+						objMCV.put(Integer.parseInt(key), Integer.parseInt(value));
+					});
 				}
 
-				Pair<Integer, Map<Integer, Integer>> oVar = new ImmutablePair<>(objectsNum, objMCV);
-				
 				TableStats predicateStat = new TableStats();
 				predicateStat.setCardinality(tripleNum);
 
-				predicateStat.addVariable("s", sVar);
-				predicateStat.addVariable("o", oVar);
+				predicateStat.addVariable("s", new ImmutablePair<>(subjectsNum, subjMCV));
+				predicateStat.addVariable("o", new ImmutablePair<>(objectsNum, objMCV));
 
 				dbs.put(vals[0], predicateStat);
 				++tp;
@@ -111,11 +106,15 @@ public class CardEstimator {
 			}
 		}
 
+		long tt = (long) dbs.get("<tp>").getCardinality();
+		int ts = dbs.get("<tp>").getVariableStats("s").getLeft();
+		int to = dbs.get("<tp>").getVariableStats("o").getLeft();
+
 		File[] files = path.listFiles();
 		Arrays.sort(files);
 
 		for (File file : files) {
-//			System.out.printf(file.getName() + ",");
+			System.out.printf(file.getName() + ",");
 //			System.out.println("------------------------------------------");
 			Query query;
 			try {
@@ -127,8 +126,8 @@ public class CardEstimator {
 			}
 			Stack<Element> pila = new Stack<>();
 			double card = 0d;
-			int btriplesCount = 0;
 			pila.push(query.getQueryPattern());
+			Queue<IOperator> tripleOperators = new LinkedList<>();
 			IOperator queryOp = null;
 			while (!pila.isEmpty()) {
 				Element e = (Element) pila.pop();
@@ -139,22 +138,22 @@ public class CardEstimator {
 				} else if (e instanceof ElementPathBlock) {
 					Iterator<TriplePath> triples = ((ElementPathBlock) e).patternElts();
 					while (triples.hasNext()) {
-						TriplePath t = triples.next();						
+						TriplePath t = triples.next();
 						if (t.isTriple()) {
-							btriplesCount++;
 //							System.out.println(t.toString());
-							Node s = t.getSubject();							
+							Node s = t.getSubject();
 							Node p = t.getPredicate();
 							Node o = t.getObject();
-							long tt = (long) dbs.get("<tp>").getCardinality();
-							int ts = dbs.get("<tp>").getVariableStats("s").getLeft();							
-							int to = dbs.get("<tp>").getVariableStats("o").getLeft();							
 							int pt;
 							int ps;
 							int po;
+							Map<Integer, Integer> mcvs;
+							Map<Integer, Integer> mcvo;
+							int mcvsTotal;
+							int mcvoTotal;
 
 							TableStats tripleStat = new TableStats();
-							
+
 							if (p.isVariable()) {
 								tripleStat.addVariable(p.getName(), new ImmutablePair<>(tp, null));
 								card = tt;
@@ -173,44 +172,53 @@ public class CardEstimator {
 									tripleStat.addVariable(o.getName(), new ImmutablePair<>(to, null));
 								}
 							} else {
-								pt = (int) dbs.get("<" + p.getURI() + ">").getCardinality();
-								ps = dbs.get("<" + p.getURI() + ">").getVariableStats("s").getLeft();
-								po = dbs.get("<" + p.getURI() + ">").getVariableStats("o").getLeft();
-								
-								//TODO Eliminar esto cuando las estadísticas estén completas
-								ps = (ps == 0)? pt : ps;
-								po = (po == 0)? pt : po;
-								
+								TableStats predicate = dbs.get("<" + p.getURI() + ">");
+								pt = (int) predicate.getCardinality();
+								ps = predicate.getVariableStats("s").getLeft();
+								po = predicate.getVariableStats("o").getLeft();
+								mcvo = predicate.getVariableStats("o").getRight();
+								mcvs = predicate.getVariableStats("s").getRight();
+								mcvsTotal = mcvs.values().stream().reduce(0, Integer::sum);
+								mcvoTotal = mcvo.values().stream().reduce(0, Integer::sum);
+
+								// TODO Eliminar esto cuando las estadísticas estén completas
+								ps = (ps == 0) ? pt : ps;
+								po = (po == 0) ? pt : po;
+
 								card = pt;
-								if (!s.isVariable())
+								if (!s.isVariable()) {
 									if (!o.isVariable())
 										card = 1d;// pt;
-									else {
-										card /= ps;
-										tripleStat.addVariable(o.getName(), new ImmutablePair<>(po, null));
+									else { // C C V
+										int val = mcvs.getOrDefault(("<" + s.getURI() + ">").hashCode(), 0);
+										if (val != 0) {
+											card = val;
+										} else {
+											card = (card - mcvsTotal) / (ps - mcvLenght);
+										}
+										tripleStat.addVariable(o.getName(), new ImmutablePair<>((int) card, null));
 									}
-								else if (!o.isVariable()) {
-									card /= po;
-									tripleStat.addVariable(s.getName(), new ImmutablePair<>(ps, null));
+								} else if (!o.isVariable()) { // V C C
+									String oo = (o.isURI()) ? "<" + o.getURI() + ">" : o.getLiteralLexicalForm();
+									int val = mcvo.getOrDefault(oo.hashCode(), 0);
+									if (val != 0) {
+										card = val;
+									} else {
+										card = (card - mcvoTotal) / (po - mcvLenght);
+									}
+									tripleStat.addVariable(s.getName(), new ImmutablePair<>((int) card, null));
 								} else {
 									tripleStat.addVariable(s.getName(), new ImmutablePair<>(ps, null));
 									tripleStat.addVariable(o.getName(), new ImmutablePair<>(po, null));
 								}
 							}
 //							System.out.println(card);
-							
-							IOperator tripleOp = new TriplePattern(tripleStat, card);
 
-							if (btriplesCount == 1) {
-								queryOp = tripleOp;
-							} else {
-								Join joinOp = new Join();
-								joinOp.setChild1(queryOp);
-								joinOp.setChild2(tripleOp);
-								queryOp = joinOp;
-							}
-						}					
+							IOperator tripleOp = new TriplePattern(tripleStat, card);
+							tripleOperators.add(tripleOp);
+						}
 					}
+
 				} else if (e instanceof ElementFilter) {
 
 				} else if (e instanceof ElementData) {
@@ -237,33 +245,35 @@ public class CardEstimator {
 					System.out.println(e);
 				}
 			}
-//			System.out.println(uniquesValues.toString());
-			System.out.println(queryOp.getCardinality());
-		}
-	}
-
-	private static int getPredicatesFromPath(Set<Node> pSet, Path path) {
-		int inf = 0;
-		Stack<Path> stack = new Stack<>();
-
-		stack.push(path);
-		while (!stack.isEmpty()) {
-			Path p = stack.pop();
-			if (p instanceof P_Path0) {
-				if (!((P_Path0) p).getNode().isVariable()) {
-					pSet.add(((P_Path0) p).getNode());
+			Set<String> seenVar = new HashSet<>();
+			boolean seen = false;
+			queryOp = tripleOperators.poll();
+			if (queryOp != null) {
+				seenVar.addAll(queryOp.getVariables());
+				IOperator elem = tripleOperators.poll();
+				while (elem != null) {
+					for (String var : elem.getVariables()) {
+						if (seenVar.contains(var)) {
+							seen = true;
+							break;
+						}
+					}
+					if (seen) {
+						Join joinOp = new Join();
+						joinOp.setChild1(queryOp);
+						joinOp.setChild2(elem);
+						queryOp = joinOp;
+						seenVar.addAll(elem.getVariables());
+					} else {
+						tripleOperators.add(elem);
+					}
+					seen = false;
+					elem = tripleOperators.poll();
 				}
-				pSet.add(((P_Path0) p).getNode());
-			} else if (p instanceof P_Path1) {
-				stack.push((Path) ((P_Path1) p).getSubPath());
-				if (p instanceof P_OneOrMore1 || p instanceof P_ZeroOrMore1) {
-					inf = 1;
-				}
-			} else if (p instanceof P_Path2) {
-				stack.push((Path) ((P_Path2) p).getLeft());
-				stack.push((Path) ((P_Path2) p).getRight());
+//				System.out.println(uniquesValues.toString());
+				System.out.println(queryOp.getCardinality());
 			}
+
 		}
-		return inf;
 	}
 }

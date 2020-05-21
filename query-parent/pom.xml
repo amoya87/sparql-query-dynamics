@@ -13,7 +13,7 @@
 	
 	<modules>
 		<module>cardinality</module>
-		<module>query</module>
+		<module>features</module>
 	</modules>
 	
 	<dependencies>

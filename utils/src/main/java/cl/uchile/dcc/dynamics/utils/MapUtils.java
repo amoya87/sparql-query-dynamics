@@ -1,5 +1,6 @@
 package cl.uchile.dcc.dynamics.utils;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -18,6 +19,21 @@ public class MapUtils
 	
 	public static Map<String, String> string2Map(String mapAsString) {
 	    return Splitter.on(',').withKeyValueSeparator('=').split(mapAsString);
+	}
+	
+	public static Map<String, String> string2Map(String mapAsString, int k) {
+		String subStringk = string2Topk(mapAsString, k);
+	    return Splitter.on(',').withKeyValueSeparator('=').split(subStringk);
+	}
+	
+	public static String string2Topk(String mapAsString, int k) {
+		String[] cads = mapAsString.split(",", k + 1);
+		if (cads.length > k) {
+			cads = Arrays.copyOf(cads, k);
+		}
+		
+		String cad = String.join(",", cads);
+		return cad;
 	}
 	
 	public static String map2String(Map<Integer, ?> map) {

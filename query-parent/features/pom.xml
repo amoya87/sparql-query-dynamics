@@ -8,7 +8,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
   
-  <artifactId>dynamics-query</artifactId>
+  <artifactId>dynamics-query-features</artifactId>
   <packaging>jar</packaging>
   <name>Project queryFeatures</name>
 
