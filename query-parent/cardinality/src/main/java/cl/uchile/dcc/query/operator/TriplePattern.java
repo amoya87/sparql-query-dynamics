@@ -1,4 +1,4 @@
-package cl.uchile.dcc.query.cardinality;
+package cl.uchile.dcc.query.operator;
 
 import java.util.Map;
 import java.util.Set;
@@ -6,18 +6,15 @@ import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 
 public class TriplePattern extends Operator{
-	
-	private double cardinality;
 
-	public TriplePattern(TableStats tripleStat, double card) {
+	public TriplePattern(TableStats tripleStat) {
 		super(tripleStat);
-		cardinality = card;
 	}
 
 	@Override
 	public double getCardinality() {
 		// TODO Auto-generated method stub
-		return cardinality;
+		return this.getStats().getCardinality();
 	}
 
 	@Override

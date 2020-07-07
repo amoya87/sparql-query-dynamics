@@ -1,4 +1,4 @@
-package cl.uchile.dcc.query.cardinality;
+package cl.uchile.dcc.query.operator;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,9 +8,9 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public class TableStats {
 	
-	public TableStats() {
+	public TableStats(double cardinality) {
 		super();
-		cardinality = -1;
+		this.cardinality = cardinality;
 		variables = new HashMap<>();
 	}
 
@@ -19,7 +19,7 @@ public class TableStats {
 	Map<String, Pair<Integer, Map<Integer, Integer>>> variables;
 
 	public double getCardinality() {
-		return cardinality;
+		return this.cardinality;
 	}
 
 	public void setCardinality(Number cardinality) {

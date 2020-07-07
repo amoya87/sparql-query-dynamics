@@ -1,4 +1,4 @@
-package cl.uchile.dcc.query.cardinality;
+package cl.uchile.dcc.query.operator;
 
 public abstract class Operator implements IOperator{
 

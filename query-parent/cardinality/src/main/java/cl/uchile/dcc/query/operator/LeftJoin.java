@@ -7,11 +7,11 @@ import java.util.Set;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
-public class Join extends Operator{
+public class LeftJoin extends Operator{
 
 	private IOperator child1;
 	private IOperator child2;
-	public Join() {
+	public LeftJoin() {
 		super();
 		// TODO Auto-generated constructor stub
 	}

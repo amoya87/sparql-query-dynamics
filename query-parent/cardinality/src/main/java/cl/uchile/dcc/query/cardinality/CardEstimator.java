@@ -39,6 +39,10 @@ import org.apache.jena.sparql.syntax.ElementSubQuery;
 import org.apache.jena.sparql.syntax.ElementUnion;
 
 import cl.uchile.dcc.dynamics.utils.MapUtils;
+import cl.uchile.dcc.query.operator.IOperator;
+import cl.uchile.dcc.query.operator.Join;
+import cl.uchile.dcc.query.operator.TableStats;
+import cl.uchile.dcc.query.operator.TriplePattern;
 
 public class CardEstimator {
 
@@ -84,8 +88,7 @@ public class CardEstimator {
 					});
 				}
 
-				TableStats predicateStat = new TableStats();
-				predicateStat.setCardinality(tripleNum);
+				TableStats predicateStat = new TableStats(tripleNum);
 
 				predicateStat.addVariable("s", new ImmutablePair<>(subjectsNum, subjMCV));
 				predicateStat.addVariable("o", new ImmutablePair<>(objectsNum, objMCV));
@@ -152,7 +155,7 @@ public class CardEstimator {
 							int mcvsTotal;
 							int mcvoTotal;
 
-							TableStats tripleStat = new TableStats();
+							TableStats tripleStat = new TableStats(-1);
 
 							if (p.isVariable()) {
 								tripleStat.addVariable(p.getName(), new ImmutablePair<>(tp, null));
@@ -214,7 +217,8 @@ public class CardEstimator {
 							}
 //							System.out.println(card);
 
-							IOperator tripleOp = new TriplePattern(tripleStat, card);
+							tripleStat.setCardinality(card);
+							IOperator tripleOp = new TriplePattern(tripleStat);
 							tripleOperators.add(tripleOp);
 						}
 					}
