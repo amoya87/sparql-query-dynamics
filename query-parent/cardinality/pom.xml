@@ -30,7 +30,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>cl.uchile.dcc.query.card.CardEstimator</mainClass>
+							<mainClass>cl.uchile.dcc.query.cardinality.QueryCardEstimator</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>

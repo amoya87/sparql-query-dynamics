@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.jena.query.ARQ;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.sparql.algebra.Algebra;
@@ -28,6 +29,7 @@ public class QueryCardEstimator {
 	}
 
 	public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
+		ARQ.init();
 		File path = new File(args[0]);
 		File datapath = new File(args[1]);
 		int mcvLenght = Integer.parseInt(args[2]);
@@ -95,7 +97,7 @@ public class QueryCardEstimator {
 
 		for (File file : files) {
 			System.out.printf(file.getName() + ",");
-			System.out.println("******************************************");
+//			System.out.println("******************************************");
 			
 //			OutputStream os = new FileOutputStream(file.getName());
 //			PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(os), "utf-8"));
@@ -104,7 +106,7 @@ public class QueryCardEstimator {
 			try {
 				query = QueryFactory.read(file.getAbsolutePath());
 			} catch (Exception e1) {
-				// TODO Auto-generated catch block
+				System.err.println(file.getAbsolutePath());
 				e1.printStackTrace();
 				continue;
 			}

@@ -30,16 +30,23 @@ public class Join extends Operator{
 		double card = card1 * card2 / Math.max(dist1, dist2);
 		
 		// Stats
+		double selectivity = Math.min(dist1, dist2) / Math.max(dist1, dist2);
 		TableStats ts = new TableStats(card);		
 		Set<String> noChanged1 = new HashSet<String>(vars1);
 		noChanged1.removeAll(intersection);
 		for (String var : noChanged1) {
-			ts.addVariable(var, child1.getVariableStats(var));
+			if (dist1 > dist2) {
+				ts.addVariable(var, new ImmutablePair<Integer,Map<Integer, Integer>>((int) (child1.getVariableStats(var).getLeft() * selectivity), null) );
+			} else 
+				ts.addVariable(var,child1.getVariableStats(var));
 		}
 		Set<String> noChanged2 = new HashSet<String>(vars2);
 		noChanged2.removeAll(intersection);
 		for (String var : noChanged2) {
-			ts.addVariable(var, child2.getVariableStats(var));
+			if (dist2 > dist1) {
+				ts.addVariable(var, new ImmutablePair<Integer,Map<Integer, Integer>>((int) (child2.getVariableStats(var).getLeft() * selectivity), null) );
+			} else 
+				ts.addVariable(var,child2.getVariableStats(var));
 		}		
 		ts.addVariable(joinvar, new ImmutablePair<>(Math.min(dist1, dist2), null));
 		this.stats = ts;

@@ -53,6 +53,7 @@ import org.apache.jena.sparql.engine.binding.Binding;
 
 import cl.uchile.dcc.query.operator.IOperator;
 import cl.uchile.dcc.query.operator.Join;
+import cl.uchile.dcc.query.operator.LeftJoin;
 import cl.uchile.dcc.query.operator.TableStats;
 import cl.uchile.dcc.query.operator.TriplePattern;
 import cl.uchile.dcc.query.operator.Union;
@@ -193,7 +194,7 @@ public class OpToCardOperator extends OpVisitorBase {
 
 		stack.push(queryOp);
 //		System.out.println(queryOp.getCardinality());
-		System.out.println("OpBGP");
+//		System.out.println("OpBGP");
 	}
 
 	@Override
@@ -254,7 +255,7 @@ public class OpToCardOperator extends OpVisitorBase {
 		IOperator queryOp = new TriplePattern(tripleStat);
 		stack.push(queryOp);
 //		System.out.println(queryOp.getCardinality());
-		System.out.println("OpTable");
+//		System.out.println("OpTable");
 	}
 
 	@Override
@@ -325,18 +326,18 @@ public class OpToCardOperator extends OpVisitorBase {
 		joinOp.setChild1(leftParam);
 		joinOp.setChild2(rightParam);
 		stack.push(joinOp);
-
+//		System.out.println("OpJoin");
 	}
 
 	@Override
 	public void visit(OpLeftJoin opLeftJoin) {
 		IOperator rightParam = stack.pop();
 		IOperator leftParam = stack.pop();
-		Join joinOp = new Join();
-		joinOp.setChild1(leftParam);
-		joinOp.setChild2(rightParam);
-		stack.push(joinOp);
-
+		LeftJoin leftJoinOp = new LeftJoin();
+		leftJoinOp.setChild1(leftParam);
+		leftJoinOp.setChild2(rightParam);
+		stack.push(leftJoinOp);
+//		System.out.println("OpLeftJoin");
 	}
 
 	@Override
@@ -347,7 +348,7 @@ public class OpToCardOperator extends OpVisitorBase {
 		unionOp.setChild1(leftParam);
 		unionOp.setChild2(rightParam);
 		stack.push(unionOp);
-
+//		System.out.println("OpUnion");
 	}
 
 	@Override

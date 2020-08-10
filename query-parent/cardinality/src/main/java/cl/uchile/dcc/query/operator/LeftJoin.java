@@ -27,9 +27,11 @@ public class LeftJoin extends Operator{
 		String joinvar = intersection.iterator().next();
 		int dist1 = child1.getVariableStats(joinvar).getLeft();
 		int dist2 = child2.getVariableStats(joinvar).getLeft();
-		double card = card1 * card2 / Math.max(dist1, dist2);
+		double left = dist1 > dist2 ? (dist1 - dist2) * (card1 / dist1): 0;
+		double card = card1 * card2 / Math.max(dist1, dist2) + left;
 		
 		// Stats
+		double selectivity = dist1 < dist2 ? dist1 / dist2 : 1;
 		TableStats ts = new TableStats(card);		
 		Set<String> noChanged1 = new HashSet<String>(vars1);
 		noChanged1.removeAll(intersection);
@@ -39,7 +41,7 @@ public class LeftJoin extends Operator{
 		Set<String> noChanged2 = new HashSet<String>(vars2);
 		noChanged2.removeAll(intersection);
 		for (String var : noChanged2) {
-			ts.addVariable(var, child2.getVariableStats(var));
+			ts.addVariable(var, new ImmutablePair<Integer,Map<Integer, Integer>>((int) (child2.getVariableStats(var).getLeft() * selectivity), null) );
 		}		
 		ts.addVariable(joinvar, new ImmutablePair<>(Math.min(dist1, dist2), null));
 		this.stats = ts;
