@@ -59,7 +59,7 @@ public class App {
 		Arrays.sort(files);
 		
 		for (File file : files) {
-//			System.out.printf(file.getName() + ",");
+			System.out.printf(file.getName() + ",");
 			Query query ;
 			try {
 				query = QueryFactory.read(file.getAbsolutePath());
@@ -187,21 +187,21 @@ public class App {
 
 			System.out.printf(triplesNum + ",");
 			System.out.printf(varSet.size() + ",");
-			System.out.printf( query.getProjectVars().size() + ",");
+//			System.out.printf( query.getProjectVars().size() + ",");
 			System.out.printf(predicateSet.size() + ",");
-			System.out.printf((((features & HASFILTER)  != 0)?1:0) + ",");
-			System.out.printf((((features & HASLIMIT) != 0)?1:0) + ",");
-			System.out.printf((((features & HASNEGATION) != 0)?1:0) + ",");
+//			System.out.printf((((features & HASFILTER)  != 0)?1:0) + ",");
+//			System.out.printf((((features & HASLIMIT) != 0)?1:0) + ",");
+//			System.out.printf((((features & HASNEGATION) != 0)?1:0) + ",");
 			System.out.printf((((features & HASUNION) != 0)?1:0) + ",");
-			System.out.printf((((features & HASINFINITEPATH) != 0)?1:0) + ",");
-			System.out.printf((((features & HASSUBQUERIES)  != 0)?1:0) + ",");
+//			System.out.printf((((features & HASINFINITEPATH) != 0)?1:0) + ",");
+//			System.out.printf((((features & HASSUBQUERIES)  != 0)?1:0) + ",");
 			System.out.printf((((features & HASOPTIONAL) != 0)?1:0) + ",");
-			System.out.printf((((features & HASDISTINCT) != 0)?1:0) + ",");
-			System.out.printf((((features & HASBIND) != 0)?1:0) + ",");	
-			System.out.printf((((features & HASHAVING) != 0)?1:0) + ",");			
-			System.out.printf((((features & HASGROUPBY) != 0)?1:0) + ",");
-			System.out.printf((((features & HASORDERBY) != 0)?1:0) + ",");
-			System.out.printf((((features & HASOFFSET) != 0)?1:0) + ",");
+//			System.out.printf((((features & HASDISTINCT) != 0)?1:0) + ",");
+//			System.out.printf((((features & HASBIND) != 0)?1:0) + ",");	
+//			System.out.printf((((features & HASHAVING) != 0)?1:0) + ",");			
+//			System.out.printf((((features & HASGROUPBY) != 0)?1:0) + ",");
+//			System.out.printf((((features & HASORDERBY) != 0)?1:0) + ",");
+//			System.out.printf((((features & HASOFFSET) != 0)?1:0) + ",");
 			System.out.println(((features & HASVALUES) != 0)?1:0);
 					
 			

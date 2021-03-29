@@ -49,8 +49,8 @@ public class QueryCardEstimator {
 			while ((line = br.readLine()) != null) {
 				String[] vals = line.split("\t");
 				long tripleNum = Long.parseLong(vals[1]);
-				int subjectsNum = Integer.parseInt(vals[2]);
-				int objectsNum = Integer.parseInt(vals[3]);
+				double subjectsNum = Integer.parseInt(vals[2]);
+				double objectsNum = Integer.parseInt(vals[3]);
 
 				Map<Integer, Integer> subjMCV = new HashMap<Integer, Integer>();
 				Map<Integer, Integer> objMCV = new HashMap<Integer, Integer>();
@@ -113,7 +113,7 @@ public class QueryCardEstimator {
 			
 			Op op1 = Algebra.compile(query);
 			
-			OpToCardOperator cardOp = new OpToCardOperator(dbs, tp, mcvLenght);
+			OpToCardOperator cardOp = new OpToCardOperator(dbs, tp);
 			OpWalker.walk(op1, cardOp);
 			IOperator treeStats = cardOp.getStats();
 			if (treeStats != null) {

@@ -32,8 +32,8 @@ public class Union extends Operator{
 		intersection.retainAll(vars2);
 		
 		for (String var : intersection) {
-			int dist1 = child1.getVariableStats(var).getLeft();
-			int dist2 = child2.getVariableStats(var).getLeft();
+			double dist1 = child1.getVariableStats(var).getLeft();
+			double dist2 = child2.getVariableStats(var).getLeft();
 			ts.addVariable(var, new ImmutablePair<>(dist1 + dist2, null));
 		}
 		
@@ -68,7 +68,7 @@ public class Union extends Operator{
 		return this.stats.getVars();
 	}
 	@Override
-	public Pair<Integer, Map<Integer, Integer>> getVariableStats(String varName) {
+	public Pair<Double, Map<Integer, Integer>> getVariableStats(String varName) {
 		return this.stats.getVariableStats(varName);
 	}
 

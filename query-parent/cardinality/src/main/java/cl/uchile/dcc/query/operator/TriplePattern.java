@@ -23,7 +23,7 @@ public class TriplePattern extends Operator{
 	}
 
 	@Override
-	public Pair<Integer, Map<Integer, Integer>> getVariableStats(String varName) {
+	public Pair<Double, Map<Integer, Integer>> getVariableStats(String varName) {
 		return stats.getVariableStats(varName);
 	}
 

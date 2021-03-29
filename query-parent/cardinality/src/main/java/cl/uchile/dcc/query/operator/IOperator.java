@@ -11,6 +11,6 @@ public interface IOperator {
 
 	public Set<String> getVariables();
 	
-	public Pair<Integer, Map<Integer, Integer>> getVariableStats(String varName);
+	public Pair<Double, Map<Integer, Integer>> getVariableStats(String varName);
 
 }

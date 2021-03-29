@@ -63,15 +63,14 @@ public class OpToCardOperator extends OpVisitorBase {
 	private Stack<IOperator> stack = new Stack<>();
 	private Map<String, TableStats> dbs;
 	private long tt;
-	private int ts;
-	private int to;
-	private int tp;
-	private int mcvLenght;
+	private double ts;
+	private double to;
+	private double tp;
+	static TableStats emptyStat = new TableStats(0);
 
-	public OpToCardOperator(Map<String, TableStats> dbs, int tp, int mcvLenght) {
+	public OpToCardOperator(Map<String, TableStats> dbs, int tp) {
 		this.dbs = dbs;
 		this.tp = tp;
-		this.mcvLenght = mcvLenght;
 		this.tt = (long) dbs.get("<tp>").getCardinality();
 		this.ts = dbs.get("<tp>").getVariableStats("s").getLeft();
 		this.to = dbs.get("<tp>").getVariableStats("o").getLeft();
@@ -92,14 +91,14 @@ public class OpToCardOperator extends OpVisitorBase {
 			Node p = t.getPredicate();
 			Node o = t.getObject();
 			int pt;
-			int ps;
-			int po;
+			double ps;
+			double po;
 			Map<Integer, Integer> mcvs;
 			Map<Integer, Integer> mcvo;
 			int mcvsTotal;
 			int mcvoTotal;
 
-			TableStats tripleStat = new TableStats(-1);
+			TableStats tripleStat = new TableStats(0);
 
 			if (p.isVariable()) {
 				tripleStat.addVariable(p.getName(), new ImmutablePair<>(tp, null));
@@ -120,44 +119,61 @@ public class OpToCardOperator extends OpVisitorBase {
 				}
 			} else {
 				TableStats predicate = dbs.get("<" + p.getURI() + ">");
-				pt = (int) predicate.getCardinality();
-				ps = predicate.getVariableStats("s").getLeft();
-				po = predicate.getVariableStats("o").getLeft();
-				mcvo = predicate.getVariableStats("o").getRight();
-				mcvs = predicate.getVariableStats("s").getRight();
-				mcvsTotal = mcvs.values().stream().reduce(0, Integer::sum);
-				mcvoTotal = mcvo.values().stream().reduce(0, Integer::sum);
+				if (predicate != null) {
+					pt = (int) predicate.getCardinality();
+					ps = predicate.getVariableStats("s").getLeft();
+					po = predicate.getVariableStats("o").getLeft();
+					mcvo = predicate.getVariableStats("o").getRight();
+					mcvs = predicate.getVariableStats("s").getRight();
+					mcvsTotal = mcvs.values().stream().reduce(0, Integer::sum);
+					mcvoTotal = mcvo.values().stream().reduce(0, Integer::sum);
 
-				// TODO Eliminar esto cuando las estadísticas estén completas
-				ps = (ps == 0) ? pt : ps;
-				po = (po == 0) ? pt : po;
+					// TODO Eliminar esto cuando las estadísticas estén completas
+					ps = (ps == 0) ? pt : ps;
+					po = (po == 0) ? pt : po;
 
-				card = pt;
-				if (!s.isVariable()) {
-					if (!o.isVariable())
-						card = 1d;// pt;
-					else { // C C V
-						int val = mcvs.getOrDefault(("<" + s.getURI() + ">").hashCode(), 0);
+					card = pt;
+					if (!s.isVariable()) {
+						if (!o.isVariable())
+							card = 1d;// pt;
+						else { // C C V
+							int val = mcvs.getOrDefault(("<" + s.getURI() + ">").hashCode(), 0);
+							if (val != 0) {
+								card = val;
+							} else {
+								card -= mcvsTotal;
+								if (card > 0) {
+									card /= (ps - mcvs.size());
+								}
+							}
+							tripleStat.addVariable(o.getName(), new ImmutablePair<>(card, null));
+						}
+					} else if (!o.isVariable()) { // V C C
+						String oo = (o.isURI()) ? "<" + o.getURI() + ">" : o.getLiteralLexicalForm();
+						int val = mcvo.getOrDefault(oo.hashCode(), 0);
 						if (val != 0) {
 							card = val;
 						} else {
-							card = (card - mcvsTotal) / (ps - mcvLenght);
+							card -= mcvoTotal;
+							if (card > 0) {
+								card /= (po - mcvo.size());
+							}
 						}
-						tripleStat.addVariable(o.getName(), new ImmutablePair<>((int) card, null));
-					}
-				} else if (!o.isVariable()) { // V C C
-					String oo = (o.isURI()) ? "<" + o.getURI() + ">" : o.getLiteralLexicalForm();
-					int val = mcvo.getOrDefault(oo.hashCode(), 0);
-					if (val != 0) {
-						card = val;
+						tripleStat.addVariable(s.getName(), new ImmutablePair<>(card, null));
 					} else {
-						card = (card - mcvoTotal) / (po - mcvLenght);
+						tripleStat.addVariable(s.getName(), new ImmutablePair<>(ps, null));
+						tripleStat.addVariable(o.getName(), new ImmutablePair<>(po, null));
 					}
-					tripleStat.addVariable(s.getName(), new ImmutablePair<>((int) card, null));
 				} else {
-					tripleStat.addVariable(s.getName(), new ImmutablePair<>(ps, null));
-					tripleStat.addVariable(o.getName(), new ImmutablePair<>(po, null));
+					card = 0d;
+					if (s.isVariable()) {
+						tripleStat.addVariable(s.getName(), new ImmutablePair<>(0d, null));
+					}
+					if (o.isVariable()) {
+						tripleStat.addVariable(o.getName(), new ImmutablePair<>(0d, null));
+					}
 				}
+				
 			}
 
 			tripleStat.setCardinality(card);
@@ -250,7 +266,7 @@ public class OpToCardOperator extends OpVisitorBase {
 
 		TableStats tripleStat = new TableStats(nvalues);
 		for (Var v : b.keySet()) {
-			tripleStat.addVariable(v.getName(), new ImmutablePair<>(b.get(v).size(), null));
+			tripleStat.addVariable(v.getName(), new ImmutablePair<>((double) b.get(v).size(), null));
 		}
 		IOperator queryOp = new TriplePattern(tripleStat);
 		stack.push(queryOp);
