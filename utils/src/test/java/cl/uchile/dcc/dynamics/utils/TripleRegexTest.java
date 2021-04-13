@@ -22,10 +22,18 @@ public class TripleRegexTest {
 	public static String SS = "_abc <http2> _abc  ";
 	public static String P = "_abc <http2> _abc.";
 	public static String PSO = "<http2> _abc _abc.";
+	public static String DBP = "<http1> <http 2> <http 3> .";
 	
 	//fail
 	public static String NF = "_abc <http2> _abc";
 	
+	@Test
+	public void testDBP() {
+		Pattern pattern = Pattern.compile(TRIPLE_REGEX);
+		Matcher matcher = pattern.matcher(DBP);
+		matcher.matches();
+		assertEquals(DBP, matcher.group(1) + " " + matcher.group(2) + " " + matcher.group(3) + " .");
+	}
 
 	@Test
 	public void testIII() {
