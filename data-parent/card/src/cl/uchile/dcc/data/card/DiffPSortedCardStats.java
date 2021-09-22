@@ -371,12 +371,12 @@ public class DiffPSortedCardStats {
 			StringBuilder istr = new StringBuilder();
 			istr.append(lastPredicate).append("\t").append(itripleCount).append("\t").append(iSubjectsSize).append("\t")
 					.append(iObjectsSize).append("\t");
-			if (iSubjectsSize < itripleCount) {
+			if (iSubjectsSize <= itripleCount) {
 				istr.append(MapUtils.topk2String(iSubjects, k)).append("\t");
 			} else {
 				istr.append("\t");
 			}
-			if (iObjectsSize < itripleCount) {
+			if (iObjectsSize <= itripleCount) {
 				istr.append(MapUtils.topk2String(iObjects, k));
 			}
 
@@ -396,12 +396,12 @@ public class DiffPSortedCardStats {
 		ustr.append(lastPredicate).append("\t").append(utripleCount).append("\t").append(uSubjectsSize).append("\t")
 				.append(uObjectsSize).append("\t");
 
-		if (uSubjectsSize < utripleCount) {
+		if (uSubjectsSize <= utripleCount) {
 			ustr.append(MapUtils.topk2String(iSubjects, k)).append("\t");
 		} else {
 			ustr.append("\t");
 		}
-		if (uObjectsSize < utripleCount) {
+		if (uObjectsSize <= utripleCount) {
 			ustr.append(MapUtils.topk2String(iObjects, k));
 		}
 
