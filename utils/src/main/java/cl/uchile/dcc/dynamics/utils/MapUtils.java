@@ -68,10 +68,10 @@ public class MapUtils
 			} else {
 				break;
 			}
-
+/*
 			if (value == 1) {
 				break;
-			}
+			}*/
 		}
 		return query.toString();
 	}
