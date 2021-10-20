@@ -2,6 +2,7 @@ package cl.uchile.dcc.dynamics.utils;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -40,29 +41,44 @@ public class MapUtils
 	    return Joiner.on(",").withKeyValueSeparator("=").join(map);
 	}
 	
-	public static String topk2String(Map<Integer, Integer> values, int k) {
+	private static <T> String toHex(T bytes) {
+		// Get complete hashed password in hex format
+		StringBuilder sb = new StringBuilder();
+		if (bytes instanceof List) {
+			List<Byte> bites = (List<Byte>) bytes;
+			for (Byte byt : bites) {
+				sb.append(Integer.toString((byt & 0xff) + 0x100, 16).substring(1));
+			}
+		} else {
+			sb.append(bytes.toString());
+		}
+		
+		return sb.toString();
+	}
+	
+	public static <T> String topk2String(Map<T, Integer> values, int k) {
 
 		ValueComparator bvc = new ValueComparator(values);
-		TreeMap<Integer, Integer> sortedMap = new TreeMap<Integer, Integer>(bvc);
+		TreeMap<T, Integer> sortedMap = new TreeMap<T, Integer>(bvc);
 		sortedMap.putAll(values);
 		StringBuilder query = new StringBuilder();
 		int i = 0;
 		for (Iterator it = sortedMap.entrySet().iterator(); it.hasNext();) {
-			Map.Entry<Integer, Integer> entry = (Map.Entry<Integer, Integer>) it.next();
+			Map.Entry<T, Integer> entry = (Map.Entry<T, Integer>) it.next();
 			i++;
-			Integer key = null;
+			T key = null;
 			Integer value = null;
 			if (i == 1) {
 				key = entry.getKey();
 				value = entry.getValue();
-				query.append(key);
+				query.append(toHex(key));
 				query.append("=");
 				query.append(value);
 			} else if (i <= k) {
 				query.append(",");
 				key = entry.getKey();
 				value = entry.getValue();
-				query.append(key);
+				query.append(toHex(key));
 				query.append("=");
 				query.append(value);
 			} else {

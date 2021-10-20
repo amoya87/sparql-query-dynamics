@@ -13,12 +13,18 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -137,6 +143,19 @@ public class DiffPSortedCardStats {
 
 	}
 
+	private static List<Byte> md5Code(String passwordToHash) throws UnsupportedEncodingException, NoSuchAlgorithmException{
+		// Create MessageDigest instance for MD5
+		MessageDigest md = MessageDigest.getInstance("MD5");
+		// Add password bytes to digest
+		md.update(passwordToHash.getBytes("UTF-8"));
+		// Get the hash's bytes
+		byte[] bytes = md.digest();
+
+		List<Byte> list = IntStream.range(0, bytes.length).mapToObj(i -> bytes[i]).collect(Collectors.toList());
+
+		return list;
+	}
+	
 	private static void diffGraph(String inl, String inr, boolean gzIn, String o1, String o2, String i1, String u1,
 			boolean gzOut, int k, long t) throws IOException {
 
@@ -186,10 +205,10 @@ public class DiffPSortedCardStats {
 		String leftTriple = inputl.readLine();
 		String rightTriple = inputr.readLine();
 
-		Map<Integer, Integer> iSubjects = new HashMap<>();
-		Map<Integer, Integer> iObjects = new HashMap<>();
-		Map<Integer, Integer> uSubjects = new HashMap<>();
-		Map<Integer, Integer> uObjects = new HashMap<>();
+		Map<List<Byte>, Integer> iSubjects = new HashMap<>();
+		Map<List<Byte>, Integer> iObjects = new HashMap<>();
+		Map<List<Byte>, Integer> uSubjects = new HashMap<>();
+		Map<List<Byte>, Integer> uObjects = new HashMap<>();
 		String lastPredicate = "";
 		boolean started = false;
 		Pattern pattern = Pattern.compile(TRIPLE_REGEX);
@@ -257,8 +276,8 @@ public class DiffPSortedCardStats {
 					}
 
 					if (!blacklist.contains(pl)) { // Count unique values
-						MapUtils.increment(uSubjects, sl.hashCode());
-						MapUtils.increment(uObjects, ol.hashCode());
+						MapUtils.increment(uSubjects, md5Code(sl));
+						MapUtils.increment(uObjects, md5Code(ol));
 					}
 					++utriplePredCount;
 					printWriter1.println(leftTriple);
@@ -283,8 +302,8 @@ public class DiffPSortedCardStats {
 					}
 
 					if (!blacklist.contains(pr)) {
-						MapUtils.increment(uSubjects, sr.hashCode());
-						MapUtils.increment(uObjects, or.hashCode());
+						MapUtils.increment(uSubjects, md5Code(sr));
+						MapUtils.increment(uObjects, md5Code(or));
 					}
 					++utriplePredCount;
 					printWriter2.println(rightTriple);
@@ -310,8 +329,8 @@ public class DiffPSortedCardStats {
 				}
 
 				if (!blacklist.contains(pl)) {
-					MapUtils.increment(iSubjects, sl.hashCode());
-					MapUtils.increment(iObjects, ol.hashCode());
+					MapUtils.increment(iSubjects, md5Code(sl));
+					MapUtils.increment(iObjects, md5Code(ol));
 				}
 				++itriplePredCount;
 				leftTriple = inputl.readLine();
@@ -360,8 +379,8 @@ public class DiffPSortedCardStats {
 		printWriter4.close();
 	}
 
-	private static void flushPredicate(long itripleCount, long otripleCount, Map<Integer, Integer> iSubjects,
-			Map<Integer, Integer> iObjects, Map<Integer, Integer> uSubjects, Map<Integer, Integer> uObjects,
+	private static void flushPredicate(long itripleCount, long otripleCount, Map<List<Byte>, Integer> iSubjects,
+			Map<List<Byte>, Integer> iObjects, Map<List<Byte>, Integer> uSubjects, Map<List<Byte>, Integer> uObjects,
 			String lastPredicate, PrintWriter i, PrintWriter u, int k) {
 
 		int iSubjectsSize = iSubjects.size();
