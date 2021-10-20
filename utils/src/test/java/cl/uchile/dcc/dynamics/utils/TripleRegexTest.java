@@ -34,7 +34,7 @@ public class TripleRegexTest {
 		Pattern pattern = Pattern.compile(TRIPLE_REGEX);
 		Matcher matcher = pattern.matcher(OLANG);
 		matcher.matches();
-		assertEquals(1, matcher.group(3).hashCode());
+		assertEquals(OLANG, matcher.group(1) + " " + matcher.group(2) + " " + matcher.group(3) + " .");
 	}
 	
 	@Test
