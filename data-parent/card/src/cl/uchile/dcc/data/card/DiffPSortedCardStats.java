@@ -13,9 +13,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -23,8 +20,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -53,6 +48,9 @@ public class DiffPSortedCardStats {
 
 		Option ingzO = new Option("igz", "input file is GZipped");
 		ingzO.setArgs(0);
+		
+		Option wO = new Option("w", "predicate whitelist");
+		wO.setArgs(1);
 
 		Option out1 = new Option("o1", "output file1");
 		out1.setArgs(1);
@@ -95,6 +93,7 @@ public class DiffPSortedCardStats {
 		options.addOption(out4);
 		options.addOption(outgzO);
 		options.addOption(helpO);
+		options.addOption(wO);
 
 		CommandLineParser parser = new DefaultParser();
 		CommandLine cmd = null;
@@ -119,6 +118,8 @@ public class DiffPSortedCardStats {
 		String inl = cmd.getOptionValue(inlO.getOpt());
 		String inr = cmd.getOptionValue(inrO.getOpt());
 		boolean gzIn = cmd.hasOption(ingzO.getOpt());
+		String wl = cmd.getOptionValue(wO.getOpt());
+		
 
 		// open the output
 		String o1 = cmd.getOptionValue(out1.getOpt());
@@ -140,12 +141,12 @@ public class DiffPSortedCardStats {
 			t = Long.parseLong(cmd.getOptionValue(tO.getOpt()));
 		}
 
-		diffGraph(inl, inr, gzIn, o1, o2, o3, o4, gzOut, k, t);
+		diffGraph(inl, inr, gzIn, o1, o2, o3, o4, gzOut, k, t, wl);
 
 	}
 	
 	private static void diffGraph(String inl, String inr, boolean gzIn, String o1, String o2, String i1, String u1,
-			boolean gzOut, int k, long t) throws IOException {
+			boolean gzOut, int k, long t, String wl) throws IOException {
 
 		// open the input
 		InputStream ils = new FileInputStream(inl);
@@ -162,7 +163,7 @@ public class DiffPSortedCardStats {
 
 		BufferedReader inputr = new BufferedReader(new InputStreamReader(irs, "utf-8"));
 		System.err.println("Reading from " + inr);
-
+		
 		OutputStream os1 = new FileOutputStream(o1);
 		OutputStream os2 = new FileOutputStream(o2);
 		if (gzOut) {
@@ -214,6 +215,18 @@ public class DiffPSortedCardStats {
 		blacklist.add("http://schema.org/description");
 		blacklist.add("http://www.w3.org/2004/02/skos/core#altLabel");
 
+		Set<String> whitelist = new HashSet<>();
+		if (wl != null) {
+			InputStream iws = new FileInputStream(wl);
+			BufferedReader inputw = new BufferedReader(new InputStreamReader(iws, "utf-8"));
+
+			String wp = inputw.readLine();
+			while (wp != null) {
+				whitelist.add(wp);
+				wp = inputw.readLine();
+			}
+		}
+		
 		try {
 			while ((leftTriple != null || rightTriple != null) && t-- > 0) {
 
@@ -275,7 +288,7 @@ public class DiffPSortedCardStats {
 						started = true;
 					}
 
-					if (!blacklist.contains(pl)) { // Count unique values
+					if (whitelist.contains(pl) && !blacklist.contains(pl)) { // Count unique values
 						MapUtils.increment(uSubjects, MapUtils.md5Code(sl));
 						MapUtils.increment(uObjects, MapUtils.md5Code(ol));
 					}
@@ -301,7 +314,7 @@ public class DiffPSortedCardStats {
 						started = true;
 					}
 
-					if (!blacklist.contains(pr)) {
+					if (whitelist.contains(pr) && !blacklist.contains(pr)) {
 						MapUtils.increment(uSubjects, MapUtils.md5Code(sr));
 						MapUtils.increment(uObjects, MapUtils.md5Code(or));
 					}
@@ -328,7 +341,7 @@ public class DiffPSortedCardStats {
 					started = true;
 				}
 
-				if (!blacklist.contains(pl)) {
+				if (whitelist.contains(pl) && !blacklist.contains(pl)) {
 					MapUtils.increment(iSubjects, MapUtils.md5Code(sl));
 					MapUtils.increment(iObjects, MapUtils.md5Code(ol));
 				}
