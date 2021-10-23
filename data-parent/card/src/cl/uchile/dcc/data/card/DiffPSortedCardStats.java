@@ -54,11 +54,9 @@ public class DiffPSortedCardStats {
 
 		Option out1 = new Option("o1", "output file1");
 		out1.setArgs(1);
-		out1.setRequired(true);
 
 		Option out2 = new Option("o2", "output file2");
 		out2.setArgs(1);
-		out2.setRequired(true);
 
 		Option out3 = new Option("i", "output intersection stat");
 		out3.setArgs(1);
@@ -164,17 +162,30 @@ public class DiffPSortedCardStats {
 		BufferedReader inputr = new BufferedReader(new InputStreamReader(irs, "utf-8"));
 		System.err.println("Reading from " + inr);
 		
-		OutputStream os1 = new FileOutputStream(o1);
-		OutputStream os2 = new FileOutputStream(o2);
-		if (gzOut) {
-			os1 = new GZIPOutputStream(os1);
-			os2 = new GZIPOutputStream(os2);
+		OutputStream os1 = null;
+		OutputStream os2 = null;
+		PrintWriter printWriter1 = null;
+		PrintWriter printWriter2 = null;
+		
+		if (o1 != null) {
+			os1 = new FileOutputStream(o1);
+			if (gzOut) {
+				os1 = new GZIPOutputStream(os1);
+			}
+			printWriter1 = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(os1), "utf-8"));
 		}
-
+		
+		if (o2 != null) {
+			os2 = new FileOutputStream(o2);
+			if (gzOut) {
+				os2 = new GZIPOutputStream(os2);
+			}
+			printWriter2 = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(os2), "utf-8"));
+		}
+		
 		OutputStream os3 = new FileOutputStream(i1);
 		OutputStream os4 = new FileOutputStream(u1);
-		PrintWriter printWriter1 = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(os1), "utf-8"));
-		PrintWriter printWriter2 = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(os2), "utf-8"));
+		
 		PrintWriter printWriter3 = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(os3), "utf-8"));
 		PrintWriter printWriter4 = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(os4), "utf-8"));
 
@@ -272,8 +283,8 @@ public class DiffPSortedCardStats {
 						if (started) { // Not first predicate
 							flushPredicate(itriplePredCount, utriplePredCount, iSubjects, iObjects, uSubjects, uObjects,
 									lastPredicate, printWriter3, printWriter4, k);
-							printWriter1.flush();
-							printWriter2.flush();
+							if (o1 != null) printWriter1.flush();
+							if (o2 != null) printWriter2.flush();
 							itripleCount += itriplePredCount;
 							utripleCount += utriplePredCount;							
 							itriplePredCount = 0;
@@ -290,7 +301,7 @@ public class DiffPSortedCardStats {
 						MapUtils.increment(uObjects, MapUtils.md5Code(ol));
 					}
 					++utriplePredCount;
-					printWriter1.println(leftTriple);
+					if (o1 != null) printWriter1.println(leftTriple);
 					leftTriple = inputl.readLine();
 					ltripleCount++;
 					continue;
@@ -300,8 +311,8 @@ public class DiffPSortedCardStats {
 						if (started) {
 							flushPredicate(itriplePredCount, utriplePredCount, iSubjects, iObjects, uSubjects, uObjects,
 									lastPredicate, printWriter3, printWriter4, k);
-							printWriter1.flush();
-							printWriter2.flush();
+							if (o1 != null) printWriter1.flush();
+							if (o2 != null) printWriter2.flush();
 							itripleCount += itriplePredCount;
 							utripleCount += utriplePredCount;
 							itriplePredCount = 0;
@@ -318,7 +329,7 @@ public class DiffPSortedCardStats {
 						MapUtils.increment(uObjects, MapUtils.md5Code(or));
 					}
 					++utriplePredCount;
-					printWriter2.println(rightTriple);
+					if (o2 != null) printWriter2.println(rightTriple);
 					rightTriple = inputr.readLine();
 					rtripleCount++;
 					continue;
@@ -329,8 +340,8 @@ public class DiffPSortedCardStats {
 					if (started) {
 						flushPredicate(itriplePredCount, utriplePredCount, iSubjects, iObjects, uSubjects, uObjects,
 								lastPredicate, printWriter3, printWriter4, k);
-						printWriter1.flush();
-						printWriter2.flush();
+						if (o1 != null) printWriter1.flush();
+						if (o2 != null) printWriter2.flush();
 						itripleCount += itriplePredCount;
 						utripleCount += utriplePredCount;
 						itriplePredCount = 0;
@@ -367,8 +378,8 @@ public class DiffPSortedCardStats {
 		if (started) {			
 			flushPredicate(itriplePredCount, utriplePredCount, iSubjects, iObjects, uSubjects, uObjects, lastPredicate,
 					printWriter3, printWriter4, k);
-			printWriter1.flush();
-			printWriter2.flush();
+			if (o1 != null) printWriter1.flush();
+			if (o2 != null) printWriter2.flush();
 			itripleCount += itriplePredCount;
 			utripleCount += utriplePredCount;
 		}
@@ -387,8 +398,8 @@ public class DiffPSortedCardStats {
 		System.err.println("Read" + rtripleCount);
 		inputl.close();
 		inputr.close();
-		printWriter1.close();
-		printWriter2.close();
+		if (o1 != null) printWriter1.close();
+		if (o2 != null) printWriter2.close();
 		printWriter3.close();
 		printWriter4.close();
 	}
