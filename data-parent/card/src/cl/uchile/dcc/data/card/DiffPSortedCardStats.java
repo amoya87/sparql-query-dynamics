@@ -35,14 +35,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.jena.graph.Node;
-import org.apache.jena.graph.Triple;
-import org.apache.jena.query.ARQ;
-import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.lang.LangNTriples;
-import org.apache.jena.riot.system.RiotLib;
-import org.apache.jena.riot.tokens.Tokenizer;
-import org.apache.jena.riot.tokens.TokenizerFactory;
+import org.apache.commons.text.StringEscapeUtils;
 
 import cl.uchile.dcc.dynamics.utils.MapUtils;
 import cl.uchile.dcc.dynamics.utils.MemStats;
@@ -50,7 +43,6 @@ import cl.uchile.dcc.dynamics.utils.MemStats;
 public class DiffPSortedCardStats {
 
 	public static void main(String[] args) throws IOException {
-		ARQ.init();
 		Option inlO = new Option("l", "left input file");
 		inlO.setArgs(1);
 		inlO.setRequired(true);
@@ -191,12 +183,6 @@ public class DiffPSortedCardStats {
 		long utripleCount = 0L;
 		long itriplePredCount = 0L;
 		long utriplePredCount = 0L;
-		String sml = null;
-		String pml = null;
-		String oml = null;
-		String smr = null;
-		String pmr = null;
-		String omr = null;
 		
 		String sl = null;
 		String pl = null;
@@ -232,41 +218,26 @@ public class DiffPSortedCardStats {
 			while ((leftTriple != null || rightTriple != null) && t-- > 0) {
 
 				if (leftTriple != null) {
-					Tokenizer tokenizer = TokenizerFactory.makeTokenizerString(leftTriple);
-					LangNTriples parser = new LangNTriples(tokenizer, RiotLib.profile(Lang.NTRIPLES, null), null) ;
-					Triple ltriple = parser.next();
-					Node s = ltriple.getSubject();
-					sl = s.isURI()?s.getURI():s.getBlankNodeLabel();
-					pl = ltriple.getPredicate().getURI();
-					Node o = ltriple.getObject();
-					ol = o.isURI()?o.getURI():o.isBlank()?o.getBlankNodeLabel():o.getLiteralLexicalForm();
-					
 					lmatcher = pattern.matcher(leftTriple);
 					if (lmatcher.matches()) {
-						sml = lmatcher.group(1);
-						pml = lmatcher.group(2);
-						oml = lmatcher.group(3);
+						sl = lmatcher.group(1);
+						pl = lmatcher.group(2);
+						ol = lmatcher.group(3);
 					} else
-						System.err.println("Error parseando " + leftTriple);
+						System.err.println("Error parseando " + leftTriple);					
+					
 				}
 
 				if (rightTriple != null) {
-					Tokenizer tokenizer = TokenizerFactory.makeTokenizerString(rightTriple);
-					LangNTriples parser = new LangNTriples(tokenizer, RiotLib.profile(Lang.NTRIPLES, null), null) ;
-					Triple rtriple = parser.next();
-					Node s = rtriple.getSubject();
-					sr = s.isURI()?s.getURI():s.getBlankNodeLabel();
-					pr = rtriple.getPredicate().getURI();
-					Node o = rtriple.getObject();
-					or = o.isURI()?o.getURI():o.isBlank()?o.getBlankNodeLabel():o.getLiteralLexicalForm();
 					
 					rmatcher = pattern.matcher(rightTriple);
 					if (rmatcher.matches()) {
-						smr = rmatcher.group(1);
-						pmr = rmatcher.group(2);
-						omr = rmatcher.group(3);
+						sr = rmatcher.group(1);
+						pr = rmatcher.group(2);
+						or = rmatcher.group(3);
 					} else
 						System.err.println("Error parseando " + rightTriple);
+										
 				}
 
 				int i;
@@ -275,10 +246,18 @@ public class DiffPSortedCardStats {
 				} else if (rightTriple == null) {
 					i = -1;
 				} else {
-					String lpso = pml + sml + oml;
-					String rpso = pmr + smr + omr;
+					String lpso = pl + sl + ol;
+					String rpso = pr + sr + or;
 					i = lpso.compareTo(rpso);
-				}
+				}				
+				
+				sl = cleanNode(sl);
+				pl = cleanNode(pl);
+				ol = cleanNode(ol);
+				sr = cleanNode(sr);
+				pr = cleanNode(pr);
+				or = cleanNode(or);
+				
 
 				if (i < 0) { // removed triple
 					if (!pl.equals(lastPredicate)) { // finished predicate
@@ -398,6 +377,21 @@ public class DiffPSortedCardStats {
 		printWriter2.close();
 		printWriter3.close();
 		printWriter4.close();
+	}
+
+	private static String cleanNode(String n) {
+		String a = null;
+		if (n != null) {
+			char c = n.charAt(0);
+			if (c=='<') {
+				a = n.substring(1, n.indexOf('>', 1));
+			} else if (c=='"') {
+				a = n.substring(1, n.indexOf(c, 1));
+			} else {
+				a = n;
+			}			
+		}
+		return StringEscapeUtils.unescapeJava(a);
 	}
 
 	private static void flushPredicate(long itripleCount, long otripleCount, Map<List<Byte>, Integer> iSubjects,
