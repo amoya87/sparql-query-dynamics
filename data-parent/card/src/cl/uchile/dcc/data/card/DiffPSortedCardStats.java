@@ -264,13 +264,8 @@ public class DiffPSortedCardStats {
 					i = lpso.compareTo(rpso);
 				}				
 				
-				sl = cleanNode(sl);
 				pl = cleanNode(pl);
-				ol = cleanNode(ol);
-				sr = cleanNode(sr);
 				pr = cleanNode(pr);
-				or = cleanNode(or);
-				
 
 				if (i < 0) { // removed triple
 					if (!pl.equals(lastPredicate)) { // finished predicate
@@ -289,6 +284,8 @@ public class DiffPSortedCardStats {
 					}
 
 					if (whitelist.contains(pl) && !blacklist.contains(pl)) { // Count unique values
+						sl = cleanNode(sl);
+						ol = cleanNode(ol);
 						MapUtils.increment(uSubjects, MapUtils.md5Code(sl));
 						MapUtils.increment(uObjects, MapUtils.md5Code(ol));
 					}
@@ -315,6 +312,8 @@ public class DiffPSortedCardStats {
 					}
 
 					if (whitelist.contains(pr) && !blacklist.contains(pr)) {
+						sr = cleanNode(sr);				
+						or = cleanNode(or);
 						MapUtils.increment(uSubjects, MapUtils.md5Code(sr));
 						MapUtils.increment(uObjects, MapUtils.md5Code(or));
 					}
@@ -342,6 +341,8 @@ public class DiffPSortedCardStats {
 				}
 
 				if (whitelist.contains(pl) && !blacklist.contains(pl)) {
+					sl = cleanNode(sl);
+					ol = cleanNode(ol);
 					MapUtils.increment(iSubjects, MapUtils.md5Code(sl));
 					MapUtils.increment(iObjects, MapUtils.md5Code(ol));
 				}
