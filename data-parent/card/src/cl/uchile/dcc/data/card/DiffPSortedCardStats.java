@@ -35,6 +35,13 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.lang.LangNTriples;
+import org.apache.jena.riot.system.RiotLib;
+import org.apache.jena.riot.tokens.Tokenizer;
+import org.apache.jena.riot.tokens.TokenizerFactory;
 
 import cl.uchile.dcc.dynamics.utils.MapUtils;
 import cl.uchile.dcc.dynamics.utils.MemStats;
@@ -199,8 +206,6 @@ public class DiffPSortedCardStats {
 		String lastPredicate = "";
 		boolean started = false;
 		Pattern pattern = Pattern.compile(TRIPLE_REGEX);
-		Matcher lmatcher = null;
-		Matcher rmatcher = null;
 		Set<String> blacklist = new HashSet<>();
 		blacklist.add("<http://schema.org/name>");
 		//blacklist.add("<http://www.w3.org/2000/01/rdf-schema#label>");
@@ -216,23 +221,25 @@ public class DiffPSortedCardStats {
 			while ((leftTriple != null || rightTriple != null) && t-- > 0) {
 
 				if (leftTriple != null) {
-					lmatcher = pattern.matcher(leftTriple);
-					if (lmatcher.matches()) {
-						sl = lmatcher.group(1);
-						pl = lmatcher.group(2);
-						ol = lmatcher.group(3);
-					} else
-						System.err.println("Error parseando " + leftTriple);
+					Tokenizer tokenizer = TokenizerFactory.makeTokenizerString(leftTriple);
+					LangNTriples parser = new LangNTriples(tokenizer, RiotLib.profile(Lang.NTRIPLES, null), null) ;
+					Triple lmatcher = parser.next();
+					Node s = lmatcher.getSubject();
+					sl = s.isURI()?s.getURI():s.getBlankNodeLabel();
+					pl = lmatcher.getPredicate().getURI();
+					Node o = lmatcher.getObject();
+					ol = o.isURI()?o.getURI():o.isBlank()?o.getBlankNodeLabel():o.getLiteralLexicalForm();
 				}
 
 				if (rightTriple != null) {
-					rmatcher = pattern.matcher(rightTriple);
-					if (rmatcher.matches()) {
-						sr = rmatcher.group(1);
-						pr = rmatcher.group(2);
-						or = rmatcher.group(3);
-					} else
-						System.err.println("Error parseando " + rightTriple);
+					Tokenizer tokenizer = TokenizerFactory.makeTokenizerString(rightTriple);
+					LangNTriples parser = new LangNTriples(tokenizer, RiotLib.profile(Lang.NTRIPLES, null), null) ;
+					Triple rmatcher = parser.next();
+					Node s = rmatcher.getSubject();
+					sr = s.isURI()?s.getURI():s.getBlankNodeLabel();
+					pr = rmatcher.getPredicate().getURI();
+					Node o = rmatcher.getObject();
+					or = o.isURI()?o.getURI():o.isBlank()?o.getBlankNodeLabel():o.getLiteralLexicalForm();
 				}
 
 				int i;

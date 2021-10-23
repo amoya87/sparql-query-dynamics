@@ -24,9 +24,18 @@ public class TripleRegexTest {
 	public static String PSO = "<http2> _abc _abc.";
 	public static String DBP = "<http1> <http 2> <http 3> .";
 	public static String OLANG = "<http1> <http 2> \"San Antonio Spurs\"@en .";
+	public static String OINT = "<http1> <http2> \"125655\"^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger> .";
 	
 	//fail
 	public static String NF = "_abc <http2> _abc";
+	
+	@Test
+	public void testOINT() {
+		Pattern pattern = Pattern.compile(TRIPLE_REGEX);
+		Matcher matcher = pattern.matcher(OINT);
+		matcher.matches();
+		assertEquals("125655", matcher.group(3));
+	}
 	
 	@Test
 	public void testOLANG() {
