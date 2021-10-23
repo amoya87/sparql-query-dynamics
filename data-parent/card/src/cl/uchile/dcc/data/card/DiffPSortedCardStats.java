@@ -216,16 +216,6 @@ public class DiffPSortedCardStats {
 		Matcher lmatcher = null;
 		Matcher rmatcher = null;
 		Set<String> blacklist = new HashSet<>();
-		blacklist.add("http://schema.org/name");
-		//blacklist.add("http://www.w3.org/2000/01/rdf-schema#label");
-		//blacklist.add("http://www.w3.org/2004/02/skos/core#prefLabel");
-		blacklist.add("http://schema.org/about");
-		blacklist.add("http://schema.org/version");
-		//blacklist.add("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
-		blacklist.add("http://schema.org/dateModified");
-		blacklist.add("http://schema.org/description");
-		blacklist.add("http://www.w3.org/2004/02/skos/core#altLabel");
-
 		Set<String> whitelist = new HashSet<>();
 		if (wl != null) {
 			InputStream iws = new FileInputStream(wl);
@@ -236,6 +226,7 @@ public class DiffPSortedCardStats {
 				whitelist.add(wp);
 				wp = inputw.readLine();
 			}
+			inputw.close();
 		}
 		
 		try {
