@@ -6,7 +6,7 @@ public final class Constants {
 private Constants(){}
 
 //triple
-public static String TRIPLE_REGEX = "^(\\S+)\\s+(<[^>]+>)\\s+\"?([^\"]+[^\\s\"]+)\\S*[\\s]*.$";
+public static String TRIPLE_REGEX = "^(\\S+)\\s+(<[^>]+>)\\s+(.+\\S+)\\s*.$";
 
 //triple
 public static String TRIPLE_REGEX_LIGHT = "^(\\S+)\\s+(\\S+)\\s+(.+\\S+)\\s*.$";

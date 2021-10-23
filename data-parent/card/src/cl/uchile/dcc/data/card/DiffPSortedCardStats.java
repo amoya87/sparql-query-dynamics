@@ -189,6 +189,13 @@ public class DiffPSortedCardStats {
 		long utripleCount = 0L;
 		long itriplePredCount = 0L;
 		long utriplePredCount = 0L;
+		String sml = null;
+		String pml = null;
+		String oml = null;
+		String smr = null;
+		String pmr = null;
+		String omr = null;
+		
 		String sl = null;
 		String pl = null;
 		String ol = null;
@@ -206,16 +213,18 @@ public class DiffPSortedCardStats {
 		String lastPredicate = "";
 		boolean started = false;
 		Pattern pattern = Pattern.compile(TRIPLE_REGEX);
+		Matcher lmatcher = null;
+		Matcher rmatcher = null;
 		Set<String> blacklist = new HashSet<>();
-		blacklist.add("<http://schema.org/name>");
-		//blacklist.add("<http://www.w3.org/2000/01/rdf-schema#label>");
-		//blacklist.add("<http://www.w3.org/2004/02/skos/core#prefLabel>");
-		blacklist.add("<http://schema.org/about>");
-		blacklist.add("<http://schema.org/version>");
-		//blacklist.add("<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>");
-		blacklist.add("<http://schema.org/dateModified>");
-		blacklist.add("<http://schema.org/description>");
-		blacklist.add("<http://www.w3.org/2004/02/skos/core#altLabel>");
+		blacklist.add("http://schema.org/name");
+		//blacklist.add("http://www.w3.org/2000/01/rdf-schema#label");
+		//blacklist.add("http://www.w3.org/2004/02/skos/core#prefLabel");
+		blacklist.add("http://schema.org/about");
+		blacklist.add("http://schema.org/version");
+		//blacklist.add("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
+		blacklist.add("http://schema.org/dateModified");
+		blacklist.add("http://schema.org/description");
+		blacklist.add("http://www.w3.org/2004/02/skos/core#altLabel");
 
 		try {
 			while ((leftTriple != null || rightTriple != null) && t-- > 0) {
@@ -223,23 +232,39 @@ public class DiffPSortedCardStats {
 				if (leftTriple != null) {
 					Tokenizer tokenizer = TokenizerFactory.makeTokenizerString(leftTriple);
 					LangNTriples parser = new LangNTriples(tokenizer, RiotLib.profile(Lang.NTRIPLES, null), null) ;
-					Triple lmatcher = parser.next();
-					Node s = lmatcher.getSubject();
+					Triple ltriple = parser.next();
+					Node s = ltriple.getSubject();
 					sl = s.isURI()?s.getURI():s.getBlankNodeLabel();
-					pl = lmatcher.getPredicate().getURI();
-					Node o = lmatcher.getObject();
+					pl = ltriple.getPredicate().getURI();
+					Node o = ltriple.getObject();
 					ol = o.isURI()?o.getURI():o.isBlank()?o.getBlankNodeLabel():o.getLiteralLexicalForm();
+					
+					lmatcher = pattern.matcher(leftTriple);
+					if (lmatcher.matches()) {
+						sml = lmatcher.group(1);
+						pml = lmatcher.group(2);
+						oml = lmatcher.group(3);
+					} else
+						System.err.println("Error parseando " + leftTriple);
 				}
 
 				if (rightTriple != null) {
 					Tokenizer tokenizer = TokenizerFactory.makeTokenizerString(rightTriple);
 					LangNTriples parser = new LangNTriples(tokenizer, RiotLib.profile(Lang.NTRIPLES, null), null) ;
-					Triple rmatcher = parser.next();
-					Node s = rmatcher.getSubject();
+					Triple rtriple = parser.next();
+					Node s = rtriple.getSubject();
 					sr = s.isURI()?s.getURI():s.getBlankNodeLabel();
-					pr = rmatcher.getPredicate().getURI();
-					Node o = rmatcher.getObject();
+					pr = rtriple.getPredicate().getURI();
+					Node o = rtriple.getObject();
 					or = o.isURI()?o.getURI():o.isBlank()?o.getBlankNodeLabel():o.getLiteralLexicalForm();
+					
+					rmatcher = pattern.matcher(rightTriple);
+					if (rmatcher.matches()) {
+						smr = rmatcher.group(1);
+						pmr = rmatcher.group(2);
+						omr = rmatcher.group(3);
+					} else
+						System.err.println("Error parseando " + rightTriple);
 				}
 
 				int i;
@@ -248,8 +273,8 @@ public class DiffPSortedCardStats {
 				} else if (rightTriple == null) {
 					i = -1;
 				} else {
-					String lpso = pl + sl + ol;
-					String rpso = pr + sr + or;
+					String lpso = pml + sml + oml;
+					String rpso = pmr + smr + omr;
 					i = lpso.compareTo(rpso);
 				}
 
