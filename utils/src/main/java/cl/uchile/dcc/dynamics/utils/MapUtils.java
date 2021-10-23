@@ -1,10 +1,15 @@
 package cl.uchile.dcc.dynamics.utils;
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
@@ -41,7 +46,7 @@ public class MapUtils
 	    return Joiner.on(",").withKeyValueSeparator("=").join(map);
 	}
 	
-	private static <T> String toHex(T bytes) {
+	public static <T> String toHex(T bytes) {
 		// Get complete hashed password in hex format
 		StringBuilder sb = new StringBuilder();
 		if (bytes instanceof List) {
@@ -90,5 +95,29 @@ public class MapUtils
 			}*/
 		}
 		return query.toString();
+	}
+	
+	public static List<Byte> md5Code(String passwordToHash){
+		// Create MessageDigest instance for MD5
+		MessageDigest md = null;
+		try {
+			md = MessageDigest.getInstance("MD5");
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		// Add password bytes to digest
+		try {
+			md.update(passwordToHash.getBytes("UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		// Get the hash's bytes
+		byte[] bytes = md.digest();
+
+		List<Byte> list = IntStream.range(0, bytes.length).mapToObj(i -> bytes[i]).collect(Collectors.toList());
+
+		return list;
 	}
 }

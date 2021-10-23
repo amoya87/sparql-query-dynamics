@@ -142,19 +142,6 @@ public class DiffPSortedCardStats {
 		diffGraph(inl, inr, gzIn, o1, o2, o3, o4, gzOut, k, t);
 
 	}
-
-	private static List<Byte> md5Code(String passwordToHash) throws UnsupportedEncodingException, NoSuchAlgorithmException{
-		// Create MessageDigest instance for MD5
-		MessageDigest md = MessageDigest.getInstance("MD5");
-		// Add password bytes to digest
-		md.update(passwordToHash.getBytes("UTF-8"));
-		// Get the hash's bytes
-		byte[] bytes = md.digest();
-
-		List<Byte> list = IntStream.range(0, bytes.length).mapToObj(i -> bytes[i]).collect(Collectors.toList());
-
-		return list;
-	}
 	
 	private static void diffGraph(String inl, String inr, boolean gzIn, String o1, String o2, String i1, String u1,
 			boolean gzOut, int k, long t) throws IOException {
@@ -276,8 +263,8 @@ public class DiffPSortedCardStats {
 					}
 
 					if (!blacklist.contains(pl)) { // Count unique values
-						MapUtils.increment(uSubjects, md5Code(sl));
-						MapUtils.increment(uObjects, md5Code(ol));
+						MapUtils.increment(uSubjects, MapUtils.md5Code(sl));
+						MapUtils.increment(uObjects, MapUtils.md5Code(ol));
 					}
 					++utriplePredCount;
 					printWriter1.println(leftTriple);
@@ -302,8 +289,8 @@ public class DiffPSortedCardStats {
 					}
 
 					if (!blacklist.contains(pr)) {
-						MapUtils.increment(uSubjects, md5Code(sr));
-						MapUtils.increment(uObjects, md5Code(or));
+						MapUtils.increment(uSubjects, MapUtils.md5Code(sr));
+						MapUtils.increment(uObjects, MapUtils.md5Code(or));
 					}
 					++utriplePredCount;
 					printWriter2.println(rightTriple);
@@ -329,8 +316,8 @@ public class DiffPSortedCardStats {
 				}
 
 				if (!blacklist.contains(pl)) {
-					MapUtils.increment(iSubjects, md5Code(sl));
-					MapUtils.increment(iObjects, md5Code(ol));
+					MapUtils.increment(iSubjects, MapUtils.md5Code(sl));
+					MapUtils.increment(iObjects, MapUtils.md5Code(ol));
 				}
 				++itriplePredCount;
 				leftTriple = inputl.readLine();

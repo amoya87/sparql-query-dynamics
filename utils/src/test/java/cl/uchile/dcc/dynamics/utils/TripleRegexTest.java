@@ -25,7 +25,6 @@ public class TripleRegexTest {
 	public static String DBP = "<http1> <http 2> <http 3> .";
 	public static String OLANG = "<http1> <http 2> \"San Antonio Spurs\"@en .";
 	
-	
 	//fail
 	public static String NF = "_abc <http2> _abc";
 	
@@ -34,7 +33,7 @@ public class TripleRegexTest {
 		Pattern pattern = Pattern.compile(TRIPLE_REGEX);
 		Matcher matcher = pattern.matcher(OLANG);
 		matcher.matches();
-		assertEquals(OLANG, matcher.group(1) + " " + matcher.group(2) + " " + matcher.group(3) + " .");
+		assertEquals(OLANG, matcher.group(1) + " " + matcher.group(2) + " \"" + matcher.group(3) + "\"@en .");
 	}
 	
 	@Test
@@ -58,7 +57,7 @@ public class TripleRegexTest {
 		Pattern pattern = Pattern.compile(TRIPLE_REGEX);
 		Matcher matcher = pattern.matcher(IIL);
 		matcher.matches();
-		assertEquals(IIL, matcher.group(1) + " " + matcher.group(2) + " " + matcher.group(3) + " .");
+		assertEquals(IIL, matcher.group(1) + " " + matcher.group(2) + " \"" + matcher.group(3) + "\" .");
 	}
 
 	@Test
@@ -82,7 +81,7 @@ public class TripleRegexTest {
 		Pattern pattern = Pattern.compile(TRIPLE_REGEX);
 		Matcher matcher = pattern.matcher(BIL);
 		matcher.matches();
-		assertEquals(BIL, matcher.group(1) + " " + matcher.group(2) + " " + matcher.group(3) + " .");
+		assertEquals(BIL, matcher.group(1) + " " + matcher.group(2) + " \"" + matcher.group(3) + "\" .");
 	}
 
 	@Test
