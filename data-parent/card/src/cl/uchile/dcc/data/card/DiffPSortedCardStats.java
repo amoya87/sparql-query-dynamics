@@ -37,6 +37,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.query.ARQ;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.lang.LangNTriples;
 import org.apache.jena.riot.system.RiotLib;
@@ -49,6 +50,7 @@ import cl.uchile.dcc.dynamics.utils.MemStats;
 public class DiffPSortedCardStats {
 
 	public static void main(String[] args) throws IOException {
+		ARQ.init();
 		Option inlO = new Option("l", "left input file");
 		inlO.setArgs(1);
 		inlO.setRequired(true);
