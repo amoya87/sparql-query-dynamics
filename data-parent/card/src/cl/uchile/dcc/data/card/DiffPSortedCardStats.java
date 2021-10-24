@@ -117,7 +117,6 @@ public class DiffPSortedCardStats {
 		String inr = cmd.getOptionValue(inrO.getOpt());
 		boolean gzIn = cmd.hasOption(ingzO.getOpt());
 		String wl = cmd.getOptionValue(wO.getOpt());
-		
 
 		// open the output
 		String o1 = cmd.getOptionValue(out1.getOpt());
@@ -285,11 +284,13 @@ public class DiffPSortedCardStats {
 						started = true;
 					}
 
-					if (whitelist.contains(pl) && !blacklist.contains(pl)) { // Count unique values
-						sl = cleanNode(sl);
-						ol = cleanNode(ol);
-						MapUtils.increment(uSubjects, MapUtils.md5Code(sl));
-						MapUtils.increment(uObjects, MapUtils.md5Code(ol));
+					if (whitelist.isEmpty() || whitelist.contains(pl)) { // Count unique values
+						if (!blacklist.contains(pl)) {
+							sl = cleanNode(sl);
+							ol = cleanNode(ol);
+							MapUtils.increment(uSubjects, MapUtils.md5Code(sl));
+							MapUtils.increment(uObjects, MapUtils.md5Code(ol));
+						}
 					}
 					++utriplePredCount;
 					if (o1 != null) printWriter1.println(leftTriple);
@@ -313,11 +314,13 @@ public class DiffPSortedCardStats {
 						started = true;
 					}
 
-					if (whitelist.contains(pr) && !blacklist.contains(pr)) {
-						sr = cleanNode(sr);				
-						or = cleanNode(or);
-						MapUtils.increment(uSubjects, MapUtils.md5Code(sr));
-						MapUtils.increment(uObjects, MapUtils.md5Code(or));
+					if (whitelist.isEmpty() || whitelist.contains(pr)) {
+						if (!blacklist.contains(pr)) {
+							sr = cleanNode(sr);				
+							or = cleanNode(or);
+							MapUtils.increment(uSubjects, MapUtils.md5Code(sr));
+							MapUtils.increment(uObjects, MapUtils.md5Code(or));
+						}
 					}
 					++utriplePredCount;
 					if (o2 != null) printWriter2.println(rightTriple);
@@ -342,11 +345,13 @@ public class DiffPSortedCardStats {
 					started = true;
 				}
 
-				if (whitelist.contains(pl) && !blacklist.contains(pl)) {
-					sl = cleanNode(sl);
-					ol = cleanNode(ol);
-					MapUtils.increment(iSubjects, MapUtils.md5Code(sl));
-					MapUtils.increment(iObjects, MapUtils.md5Code(ol));
+				if (whitelist.isEmpty() || whitelist.contains(pl)) {
+					if (!blacklist.contains(pl)) {
+						sl = cleanNode(sl);
+						ol = cleanNode(ol);
+						MapUtils.increment(iSubjects, MapUtils.md5Code(sl));
+						MapUtils.increment(iObjects, MapUtils.md5Code(ol));
+					}
 				}
 				++itriplePredCount;
 				leftTriple = inputl.readLine();
