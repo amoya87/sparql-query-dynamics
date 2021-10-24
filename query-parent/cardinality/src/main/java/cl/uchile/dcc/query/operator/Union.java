@@ -68,7 +68,7 @@ public class Union extends Operator{
 		return this.stats.getVars();
 	}
 	@Override
-	public Pair<Double, Map<Integer, Integer>> getVariableStats(String varName) {
+	public Pair<Double, Map<String, Integer>> getVariableStats(String varName) {
 		return this.stats.getVariableStats(varName);
 	}
 

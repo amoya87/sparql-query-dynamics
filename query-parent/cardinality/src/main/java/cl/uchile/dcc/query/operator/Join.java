@@ -24,21 +24,21 @@ public class Join extends Operator{
 		Set<String> vars2 = child2.getVariables();
 		Set<String> intersection = new HashSet<String>(vars1); // use the copy constructor
 		intersection.retainAll(vars2);
-		String joinvar = intersection.iterator().next();
-		double dist1 = child1.getVariableStats(joinvar).getLeft();
-		double dist2 = child2.getVariableStats(joinvar).getLeft();
+		String joinvar = (intersection.isEmpty()) ? null:intersection.iterator().next();
+		double dist1 = (joinvar != null) ? child1.getVariableStats(joinvar).getLeft():0;
+		double dist2 = (joinvar != null) ? child2.getVariableStats(joinvar).getLeft():0;
 		double maxDist = Math.max(dist1, dist2);
 		maxDist = (maxDist == 0) ? 1 : maxDist;
 		double card = card1 * card2 / maxDist;
 		
 		// Stats
-		double selectivity = Math.min(dist1, dist2) / maxDist;
-		TableStats ts = new TableStats(card);		
+		TableStats ts = new TableStats(card);
 		Set<String> noChanged1 = new HashSet<String>(vars1);
 		noChanged1.removeAll(intersection);
+		double selectivity = Math.min(dist1, dist2) / maxDist;		
 		for (String var : noChanged1) {
 			if (dist1 > dist2) {
-				ts.addVariable(var, new ImmutablePair<Double,Map<Integer, Integer>>(child1.getVariableStats(var).getLeft() * selectivity, null) );
+				ts.addVariable(var, new ImmutablePair<Double, Map<String, Integer>>(child1.getVariableStats(var).getLeft() * selectivity, null) );
 			} else 
 				ts.addVariable(var,child1.getVariableStats(var));
 		}
@@ -46,12 +46,15 @@ public class Join extends Operator{
 		noChanged2.removeAll(intersection);
 		for (String var : noChanged2) {
 			if (dist2 > dist1) {
-				ts.addVariable(var, new ImmutablePair<Double,Map<Integer, Integer>>(child2.getVariableStats(var).getLeft() * selectivity, null) );
+				ts.addVariable(var, new ImmutablePair<Double, Map<String, Integer>>(child2.getVariableStats(var).getLeft() * selectivity, null) );
 			} else {
 				ts.addVariable(var,child2.getVariableStats(var));
 			}
-		}		
-		ts.addVariable(joinvar, new ImmutablePair<>(Math.min(dist1, dist2), null));
+		}	
+		if (joinvar != null) {
+			ts.addVariable(joinvar, new ImmutablePair<>(Math.min(dist1, dist2), null));
+		}
+		
 		this.stats = ts;
 		return card;
 	}
@@ -72,7 +75,7 @@ public class Join extends Operator{
 		return this.stats.getVars();
 	}
 	@Override
-	public Pair<Double, Map<Integer, Integer>> getVariableStats(String varName) {
+	public Pair<Double, Map<String, Integer>> getVariableStats(String varName) {
 		return this.stats.getVariableStats(varName);
 	}
 

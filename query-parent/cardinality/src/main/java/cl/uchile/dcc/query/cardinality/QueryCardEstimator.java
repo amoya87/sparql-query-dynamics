@@ -52,14 +52,14 @@ public class QueryCardEstimator {
 				double subjectsNum = Integer.parseInt(vals[2]);
 				double objectsNum = Integer.parseInt(vals[3]);
 
-				Map<Integer, Integer> subjMCV = new HashMap<Integer, Integer>();
-				Map<Integer, Integer> objMCV = new HashMap<Integer, Integer>();
+				Map<String, Integer> subjMCV = new HashMap<>();
+				Map<String, Integer> objMCV = new HashMap<>();
 
 				if (vals.length > 4) {
 					String smcv = vals[4];
 					if (!smcv.equals("")) {
 						Map<String, String> subjMCVStr = MapUtils.string2Map(smcv, mcvLenght);
-						subjMCVStr.forEach((key, value) -> subjMCV.put(Integer.parseInt(key), Integer.parseInt(value)));
+						subjMCVStr.forEach((key, value) -> subjMCV.put(key, Integer.parseInt(value)));
 					}
 				}
 
@@ -67,7 +67,7 @@ public class QueryCardEstimator {
 					String omcv = vals[5];
 					Map<String, String> objMCVStr = MapUtils.string2Map(omcv, mcvLenght);
 					objMCVStr.forEach((key, value) -> {
-						objMCV.put(Integer.parseInt(key), Integer.parseInt(value));
+						objMCV.put(key, Integer.parseInt(value));
 					});
 				}
 

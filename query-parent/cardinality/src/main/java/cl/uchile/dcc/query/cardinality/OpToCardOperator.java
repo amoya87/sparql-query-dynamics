@@ -51,6 +51,7 @@ import org.apache.jena.sparql.algebra.op.OpUnion;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 
+import cl.uchile.dcc.dynamics.utils.MapUtils;
 import cl.uchile.dcc.query.operator.IOperator;
 import cl.uchile.dcc.query.operator.Join;
 import cl.uchile.dcc.query.operator.LeftJoin;
@@ -93,8 +94,8 @@ public class OpToCardOperator extends OpVisitorBase {
 			int pt;
 			double ps;
 			double po;
-			Map<Integer, Integer> mcvs;
-			Map<Integer, Integer> mcvo;
+			Map<String, Integer> mcvs;
+			Map<String, Integer> mcvo;
 			int mcvsTotal;
 			int mcvoTotal;
 
@@ -118,7 +119,7 @@ public class OpToCardOperator extends OpVisitorBase {
 					tripleStat.addVariable(o.getName(), new ImmutablePair<>(to, null));
 				}
 			} else {
-				TableStats predicate = dbs.get("<" + p.getURI() + ">");
+				TableStats predicate = dbs.get(p.getURI());
 				if (predicate != null) {
 					pt = (int) predicate.getCardinality();
 					ps = predicate.getVariableStats("s").getLeft();
@@ -128,7 +129,7 @@ public class OpToCardOperator extends OpVisitorBase {
 					mcvsTotal = mcvs.values().stream().reduce(0, Integer::sum);
 					mcvoTotal = mcvo.values().stream().reduce(0, Integer::sum);
 
-					// TODO Eliminar esto cuando las estadísticas estén completas
+					// TODO Eliminar esto cuando las estadï¿½sticas estï¿½n completas
 					ps = (ps == 0) ? pt : ps;
 					po = (po == 0) ? pt : po;
 
@@ -137,7 +138,7 @@ public class OpToCardOperator extends OpVisitorBase {
 						if (!o.isVariable())
 							card = 1d;// pt;
 						else { // C C V
-							int val = mcvs.getOrDefault(("<" + s.getURI() + ">").hashCode(), 0);
+							int val = mcvs.getOrDefault(MapUtils.toHex(MapUtils.md5Code(s.getURI())), 0);
 							if (val != 0) {
 								card = val;
 							} else {
@@ -149,8 +150,8 @@ public class OpToCardOperator extends OpVisitorBase {
 							tripleStat.addVariable(o.getName(), new ImmutablePair<>(card, null));
 						}
 					} else if (!o.isVariable()) { // V C C
-						String oo = (o.isURI()) ? "<" + o.getURI() + ">" : o.getLiteralLexicalForm();
-						int val = mcvo.getOrDefault(oo.hashCode(), 0);
+						String oo = (o.isURI()) ? o.getURI() : o.getLiteralLexicalForm();
+						int val = mcvo.getOrDefault(MapUtils.toHex(MapUtils.md5Code(oo)), 0);
 						if (val != 0) {
 							card = val;
 						} else {
@@ -182,6 +183,7 @@ public class OpToCardOperator extends OpVisitorBase {
 		}
 
 		Set<String> seenVar = new HashSet<>();
+		Queue<IOperator> visitedOperators = new LinkedList<>();
 		boolean seen = false;
 		queryOp = tripleOperators.poll();
 		if (queryOp != null) {
@@ -194,14 +196,16 @@ public class OpToCardOperator extends OpVisitorBase {
 						break;
 					}
 				}
-				if (seen) {
+				if (seen || tripleOperators.isEmpty()) {
 					Join joinOp = new Join();
 					joinOp.setChild1(queryOp);
 					joinOp.setChild2(elem);
 					queryOp = joinOp;
 					seenVar.addAll(elem.getVariables());
+					tripleOperators.addAll(visitedOperators);
+					visitedOperators.clear();
 				} else {
-					tripleOperators.add(elem);
+					visitedOperators.add(elem);
 				}
 				seen = false;
 				elem = tripleOperators.poll();

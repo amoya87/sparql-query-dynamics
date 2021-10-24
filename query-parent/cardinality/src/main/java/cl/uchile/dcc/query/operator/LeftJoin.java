@@ -24,28 +24,30 @@ public class LeftJoin extends Operator{
 		Set<String> vars2 = child2.getVariables();
 		Set<String> intersection = new HashSet<String>(vars1); // use the copy constructor
 		intersection.retainAll(vars2);
-		String joinvar = intersection.iterator().next();
-		Double dist1 = child1.getVariableStats(joinvar).getLeft();
-		Double dist2 = child2.getVariableStats(joinvar).getLeft();
+		String joinvar = (intersection.isEmpty()) ? null:intersection.iterator().next();
+		double dist1 = (joinvar != null) ? child1.getVariableStats(joinvar).getLeft():0;
+		double dist2 = (joinvar != null) ? child2.getVariableStats(joinvar).getLeft():0;
 		double left = dist1 > dist2 ? (dist1 - dist2) * (card1 / dist1): 0;
 		double maxDist = Math.max(dist1, dist2) + left;
 		maxDist = (maxDist == 0) ? 1 : maxDist;
 		double card = card1 * card2 / maxDist;
 		
 		// Stats
-		double selectivity = dist1 < dist2 ? dist1 / dist2 : 1;
 		TableStats ts = new TableStats(card);
 		Set<String> noChanged1 = new HashSet<String>(vars1);
 		noChanged1.removeAll(intersection);
+		double selectivity = dist1 < dist2 ? dist1 / dist2 : 1;
 		for (String var : noChanged1) {
 			ts.addVariable(var, child1.getVariableStats(var));
 		}
 		Set<String> noChanged2 = new HashSet<String>(vars2);
 		noChanged2.removeAll(intersection);
 		for (String var : noChanged2) {
-			ts.addVariable(var, new ImmutablePair<Double,Map<Integer, Integer>>(child2.getVariableStats(var).getLeft() * selectivity, null) );
-		}		
-		ts.addVariable(joinvar, new ImmutablePair<>(dist1, null));
+			ts.addVariable(var, new ImmutablePair<Double, Map<String, Integer>>(child2.getVariableStats(var).getLeft() * selectivity, null));
+		}
+		if (joinvar != null) {
+			ts.addVariable(joinvar, new ImmutablePair<>(dist1, null));			
+		}
 		this.stats = ts;
 		return card;
 	}
@@ -66,7 +68,7 @@ public class LeftJoin extends Operator{
 		return this.stats.getVars();
 	}
 	@Override
-	public Pair<Double, Map<Integer, Integer>> getVariableStats(String varName) {
+	public Pair<Double, Map<String, Integer>> getVariableStats(String varName) {
 		return this.stats.getVariableStats(varName);
 	}
 
