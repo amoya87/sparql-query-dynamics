@@ -106,7 +106,7 @@ public class OpToCardOperator extends OpVisitorBase {
 				card = tt;
 				if (!s.isVariable())
 					if (!o.isVariable())
-						card /= tp;
+						card = 1;
 					else {
 						card /= ts;
 						tripleStat.addVariable(o.getName(), new ImmutablePair<>(to, null));
